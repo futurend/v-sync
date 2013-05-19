@@ -26,8 +26,8 @@ process.on('SIGINT', exitFunction);
 
 // START ///////////////////////////////////
 
-process.argv.forEach(function (val, index, array) {
-    console.log(index + ': ' + val);
+process.argv.forEach(function (val,idx,arr) {
+    console.log(idx +': '+ val);
 });
 
 require('child_process').exec('ps aux | grep omxplayer | grep -v grep', function (error, stdout, stderr) {
