@@ -17,16 +17,15 @@ var run = function ()
     if (process.argv[2]) {
         var arg = process.argv[2];
         if (arg.search(/^[^\.]+\.(mp4|m4v|mov)$/) !== -1) {
-           console.log('loading '+arg+'...');
+           console.log('loading '+ arg +'...');
+           // clear terminal, move cursor to top left and hide cursor
+           console.log('\033[2J\033\033[H\033[?25l');
+           // play video
+           vidProc = spawn('omxplayer', ['/home/pi/ferrandini.mp4']);
+           vidProc.stdout.on('data', function (data) { vidProcLog += data; });
+           vidProc.stderr.on('data', function (data) { vidProcLog += data; });
         }
     }
-
-    // clear terminal, move cursor to top left and hide cursor
-    console.log('\033[2J\033\033[H\033[?25l');
-    // play video
-    vidProc = spawn('omxplayer', ['/home/pi/ferrandini.mp4']);
-    vidProc.stdout.on('data', function (data) { vidProcLog += data; });
-    vidProc.stderr.on('data', function (data) { vidProcLog += data; });
 }
 
 // handle ctrl-C gracefully
