@@ -14,10 +14,10 @@ var exitFunction = function (code) {
 
 var run = function ()
 {
-    if (process.argv[2]) {
-        var arg = process.argv[2];
+    var arg = process.argv[2];
+    // check for file to playback
+    if (arg) {
         if (arg.search(/^[^\.]+\.(mp4|m4v|mov)$/) !== -1) {
-           console.log('loading '+ arg +'...');
            // clear terminal, move cursor to top left and hide cursor
            console.log('\033[2J\033\033[H\033[?25l');
            // play video
