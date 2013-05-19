@@ -25,6 +25,8 @@ var run = function ()
            vidProc.stdout.on('data', function (data) { vidProcLog += data; });
            vidProc.stderr.on('data', function (data) { vidProcLog += data; });
         }
+    } else {
+        console.log('not enough arguments.\ne.g.: node vidcomm.js filename.ext');
     }
 }
 
