@@ -21,7 +21,7 @@ var run = function ()
            // clear terminal, move cursor to top left and hide cursor
            console.log('\033[2J\033\033[H\033[?25l');
            // play video
-           vidProc = spawn('omxplayer', ['/home/pi/ferrandini.mp4']);
+           vidProc = spawn('omxplayer', [arg]);
            vidProc.stdout.on('data', function (data) { vidProcLog += data; });
            vidProc.stderr.on('data', function (data) { vidProcLog += data; });
         }
