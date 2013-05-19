@@ -30,6 +30,10 @@ process.argv.forEach(function (val,idx,arr) {
     console.log(idx +': '+ val);
 });
 
+if (process.argv[2].search(gi/^[^\.]\.(mp4|m4v|mov)$/)) {
+    console.log(process.argv[2]);
+}
+
 require('child_process').exec('ps aux | grep omxplayer | grep -v grep', function (error, stdout, stderr) {
     if (stdout.length) {
 	console.log('vidcomm already running on this machine');
