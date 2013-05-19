@@ -26,6 +26,10 @@ process.on('SIGINT', exitFunction);
 
 // START ///////////////////////////////////
 
+process.argv.forEach(function (val, index, array) {
+    console.log(index + ': ' + val);
+});
+
 require('child_process').exec('ps aux | grep omxplayer | grep -v grep', function (error, stdout, stderr) {
     if (stdout.length) {
 	console.log('vidcomm already running on this machine');
