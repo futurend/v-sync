@@ -12,7 +12,15 @@ var exitFunction = function (code) {
     console.log('\033[?12l\033[?25h');
 }
 
-var run = function () {
+var run = function ()
+{
+    if (process.argv[2]) {
+        var arg = process.argv[2];
+        if (arg.search(/^[^\.]+\.(mp4|m4v|mov)$/) !== -1) {
+           console.log('loading '+arg+'...');
+        }
+    }
+
     // clear terminal, move cursor to top left and hide cursor
     console.log('\033[2J\033\033[H\033[?25l');
     // play video
@@ -26,14 +34,6 @@ process.on('SIGINT', exitFunction);
 
 // START ///////////////////////////////////
 
-process.argv.forEach(function (val,idx,arr) {
-    console.log(idx +': '+ val);
-});
-
-if (process.argv[2].search(gi/^[^\.]\.(mp4|m4v|mov)$/)) {
-    console.log(process.argv[2]);
-}
-
 require('child_process').exec('ps aux | grep omxplayer | grep -v grep', function (error, stdout, stderr) {
     if (stdout.length) {
 	console.log('vidcomm already running on this machine');
@@ -41,6 +41,6 @@ require('child_process').exec('ps aux | grep omxplayer | grep -v grep', function
         exitFunction();
         process.exit(1);
     } else {
-        // run();
+        run();
     }
 });

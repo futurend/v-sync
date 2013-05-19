@@ -1,4 +1,3 @@
 #!/bin/sh
-sleep 2
 node /home/pi/vidcomm/vidcomm.js
 
