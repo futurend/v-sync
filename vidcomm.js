@@ -110,10 +110,12 @@ var run = function () {
                             playVideo(arg2);
                         } else {
                             console.log('couldn\'t find local ip address. letting server down.');
+                            playVideo(arg2);
                         }
                     });
                 } else {
                     console.log('couldn\'t get remote ip address. letting server down.');
+                    playVideo(arg2);
                 }
             } else {
                 playVideo(arg2);
