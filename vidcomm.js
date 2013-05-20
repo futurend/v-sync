@@ -32,6 +32,8 @@ var parseRequest = function (req_, res_) {
     var url = urlmod.parse(req_.url);
     
     if (url.href) {
+        console.log('valid url');
+        respond(url.href, req_, res_);
     } else {
         console.log('invalid url');
         respond('{error:"invalid url"}', req_, res_);
@@ -46,10 +48,10 @@ var startServer = function () {
                 console.log('error: connection closed');
             });
             req.on('data', function() {
-                // console.log('warn: data comming');
+                console.log('warn: data comming');
             });
             req.on('end', function() {
-                // console.log('req.on end');
+                console.log('req.on end');
                 parseRequest(req, res);
             });
         } else {
