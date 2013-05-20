@@ -73,10 +73,10 @@ var startServer = function () {
     console.log('server running at http://'+localAddress+':'+localPort);
 }
 
-var playVideo = function () {
+var playVideo = function (filename) {
     // check if the other video is playing
     // play video
-    vidProc = spawn('omxplayer', [arg2]);
+    vidProc = spawn('omxplayer', [filename]);
     vidProc.stdout.on('data', function (data) { vidProcLog += data; });
     vidProc.stderr.on('data', function (data) { vidProcLog += data; });
 }
@@ -95,9 +95,9 @@ var run = function () {
             if (arg3) {
                 // start web server
                 startServer();
-                playVideo();
+                playVideo(arg2);
             } else {
-                playVideo();
+                playVideo(arg2);
             }
         }
     } else {
