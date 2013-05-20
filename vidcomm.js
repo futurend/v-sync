@@ -11,6 +11,7 @@ var spawn = require('child_process').spawn,
 // INIT ////////////////////////////////////
 
 var exitFunction = function (code) {
+    console.log('exiting');
     if (code) console.log('exited with code '+code);
     console.log(vidProcLog);
     // show cursor
