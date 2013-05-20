@@ -37,7 +37,7 @@ var respond = function (data) {
 var parseRequest = function () {
     var url = urlmod.parse(req.url);
     if (url.href) {
-        console.log('valid url');
+        console.log(url.href);
         if (comm[url.href]) comm[url.href]();
         else respond('bad command');
     } else {
