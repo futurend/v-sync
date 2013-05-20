@@ -70,6 +70,7 @@ var run = function () {
     var arg = process.argv[2];
     // check for file to play back
     if (arg) {
+        console.log('arg exists.');
         if (arg.search(/^[^\.]+\.(mp4|m4v|mov)$/) !== -1) {
             console.log('arg is valid.');
             // clear terminal, move cursor to top left and hide cursor
