@@ -3,7 +3,7 @@ var spawn = require('child_process').spawn,
     urlmod = require('url'),
     vidProc,
     vidProcLog = '',
-    localAddress = '192.168.1.94',
+    localAddress = '127.0.0.1',
     localPort = 3000,
     remoteAddress = '192.168.1.95',
     remotePort = 3000;
