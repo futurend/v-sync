@@ -70,9 +70,9 @@ var startServer = function () {
             console.log('error: no accepted HTTP method');
             respond('0');
         }
-    }).listen(localPort, localAddress);
+    }).listen(port, localAddress);
 
-    console.log('server running at http://'+localAddress+':'+localPort);
+    console.log('server running at http://'+localAddress+':'+port);
 }
 
 var playing = function () {
