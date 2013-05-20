@@ -102,6 +102,7 @@ require('child_process').exec('ps aux | grep omxplayer | grep -v grep', function
         exitFunction();
         process.exit(1);
     } else {
+        console.log('vidcomm starting.');
         run();
     }
 });
