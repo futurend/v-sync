@@ -10,7 +10,7 @@ var localAddress,
     req,
     res,
     comm = {
-        'playing?': playing,
+        'playing': playing,
         'ended': playVideo
     };
 
