@@ -86,15 +86,18 @@ var run = function () {
 }
 
 // handle ctrl-C gracefully
-process.on('SIGINT', exitFunction);
+process.on('SIGINT', function () {
+    exitFunction();
+    process.exit(1);
+});
 
 // START ///////////////////////////////////
 
-require('child_process').exec('ps aux | grep omxplayer | grep -v grep', function (error, stdout, stderr)
-{
+// check if other vidcomm process is running
+require('child_process').exec('ps aux | grep omxplayer | grep -v grep', function (error, stdout, stderr) {
     if (stdout.length) {
-	console.log('vidcomm is already running on this machine. exiting.');
-	console.log(stdout);
+        console.log('vidcomm is already running on this machine. exiting.');
+        console.log(stdout);
         exitFunction();
         process.exit(1);
     } else {
