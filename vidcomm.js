@@ -4,10 +4,9 @@ var spawn = require('child_process').spawn,
 var vidProc,
     vidProcLog = '',
     playing = false;
-var localAddress = '192.168.1.94',
-    localPort = 3000,
-    remoteAddress = '192.168.1.67',
-    remotePort = 3000,
+var localAddress,
+    remoteAddress,
+    port = 3000,
     req,
     res,
     comm = {
@@ -101,9 +100,21 @@ var run = function () {
             console.log('\033[2J\033\033[H\033[?25l');
             // if another server address is provided...
             if (arg3) {
-                // start web server
-                startServer();
-                playVideo(arg2);
+                if (arg3.search(/192\.168\.1\.\d+/) !== -1) {
+                    remoteAddress = arg3;
+                    // find local ip address
+                    require('child_process').exec('ifconfig eth0 | grep \'inet addr:\' | cut -d: -f2 | awk \'{ print $1}\'', function (error, stdout, stderr) {
+                        if (stdout.search(/192\.168\.1\.\d+/) !== -1) {
+                            localAddress = stdout;
+                            startServer();
+                            playVideo(arg2);
+                        } else {
+                            console.log('couldn\'t find local ip address. letting server down.');
+                        }
+                    });
+                } else {
+                    console.log('couldn\'t get remote ip address. letting server down.');
+                }
             } else {
                 playVideo(arg2);
             }
@@ -117,11 +128,6 @@ var run = function () {
 process.on('SIGINT', function () {
     exitFunction();
     process.exit(1);
-});
-
-// find local ip address
-require('child_process').exec('ifconfig eth0 | grep \'inet addr:\' | cut -d: -f2 | awk \'{ print $1}\'', function (error, stdout, stderr) {
-    console.log(stdout);
 });
 
 // START ///////////////////////////////////
