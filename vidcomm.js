@@ -39,7 +39,7 @@ var parseRequest = function () {
     if (url.href) {
         console.log('valid url');
         if (comm[url.href]) comm[url.href]();
-        else respond('0')
+        else respond('bad command');
     } else {
         console.log('invalid url');
         respond('{error:"invalid url"}');
