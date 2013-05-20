@@ -3,8 +3,10 @@ var spawn = require('child_process').spawn,
     urlmod = require('url'),
     vidProc,
     vidProcLog = '',
-    srvrAddress = '127.0.0.1',
-    srvrPort = 3000;
+    localAddress = '192.168.1.94',
+    localPort = 3000,
+    remoteAddress = '192.168.1.95',
+    remotePort = 3000;
 
 // INIT ////////////////////////////////////
 
@@ -58,24 +60,25 @@ var startServer = function () {
             console.log('error: no accepted HTTP method');
             respond('', req, res);
         }
-    }).listen(srvrPort, srvrAddress);
+    }).listen(localPort, localAddress);
 
-    console.log('Server running at http://'+srvrAddress+':'+srvrPort);
+    console.log('Server running at http://'+localAddress+':'+localPort);
 }
 
-var run = function ()
-{
+var run = function () {
     var arg = process.argv[2];
     // check for file to play back
     if (arg) {
-        startServer();
         if (arg.search(/^[^\.]+\.(mp4|m4v|mov)$/) !== -1) {
-           // clear terminal, move cursor to top left and hide cursor
-           console.log('\033[2J\033\033[H\033[?25l');
-           // play video
-           vidProc = spawn('omxplayer', [arg]);
-           vidProc.stdout.on('data', function (data) { vidProcLog += data; });
-           vidProc.stderr.on('data', function (data) { vidProcLog += data; });
+            // clear terminal, move cursor to top left and hide cursor
+            console.log('\033[2J\033\033[H\033[?25l');
+            // start web server
+            startServer();
+            // check if the other video is playing
+            // play video
+            vidProc = spawn('omxplayer', [arg]);
+            vidProc.stdout.on('data', function (data) { vidProcLog += data; });
+            vidProc.stderr.on('data', function (data) { vidProcLog += data; });
         }
     } else {
         console.log('not enough arguments. a video filename must be provided.\ne.g.: node vidcomm.js filename.ext');
