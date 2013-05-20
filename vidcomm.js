@@ -119,6 +119,11 @@ process.on('SIGINT', function () {
     process.exit(1);
 });
 
+// find local ip address
+require('child_process').exec('ifconfig eth0 | grep \'inet addr:\' | cut -d: -f2 | awk \'{ print $1}\'', function (error, stdout, stderr) {
+    console.log(stdout);
+}
+
 // START ///////////////////////////////////
 
 // check if other vidcomm process is running
