@@ -25,14 +25,11 @@ var exitFunction = function (code) {
 }
 
 var respond = function (data) {
-    // var head = {
-    //     'Content-Length': Buffer.byteLength(data),
-    //     'Content-Type': contentType || 'text/plain; charset=utf-8',
-    //     'Expires': (new Date(cacheExpiry)).toUTCString(),
-    //     'Access-Control-Allow-Origin': '*'
-    // }
-
-    // console.log('---');
+    var headers = {
+        'Content-Length': Buffer.byteLength(data),
+        'Content-Type': contentType || 'text/plain; charset=utf-8',
+        'Expires': (new Date(Date.now)).toUTCString()
+    }
     res.writeHead(200, headers);
     res.end(data);
 }
