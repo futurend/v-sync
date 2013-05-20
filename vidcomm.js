@@ -1,11 +1,12 @@
 var spawn = require('child_process').spawn,
     http = require('http'),
-    urlmod = require('url'),
-    vidProc,
+    urlmod = require('url');
+var vidProc,
     vidProcLog = '',
-    localAddress = '192.168.1.94',
+    playing = false;
+var localAddress = '192.168.1.94',
     localPort = 3000,
-    remoteAddress = '192.168.1.95',
+    remoteAddress = '192.168.1.67',
     remotePort = 3000;
 
 // INIT ////////////////////////////////////
@@ -33,10 +34,15 @@ var respond = function (data, req, res, headers, callback) {
 
 var parseRequest = function (req_, res_) {
     var url = urlmod.parse(req_.url);
-    
     if (url.href) {
         console.log('valid url');
         respond(url.href, req_, res_);
+        if (url.href === '/playing?') {
+            if (vidProc) respond('yes', req_, res_);
+            else respond('no', req_, res_);
+        } else if (url.href === '/play') {
+        } else if (url.href === '/stop') {
+        }
     } else {
         console.log('invalid url');
         respond('{error:"invalid url"}', req_, res_);
@@ -44,6 +50,7 @@ var parseRequest = function (req_, res_) {
 }
 
 var startServer = function () {
+    console.log('starting local server.');
     // run local server
     http.createServer(function (req, res) {
         if (req.method === 'GET') {
@@ -63,25 +70,35 @@ var startServer = function () {
         }
     }).listen(localPort, localAddress);
 
-    console.log('Server running at http://'+localAddress+':'+localPort);
+    console.log('server running at http://'+localAddress+':'+localPort);
+}
+
+var playVideo = function () {
+    // check if the other video is playing
+    // play video
+    vidProc = spawn('omxplayer', [arg2]);
+    vidProc.stdout.on('data', function (data) { vidProcLog += data; });
+    vidProc.stderr.on('data', function (data) { vidProcLog += data; });
 }
 
 var run = function () {
-    var arg = process.argv[2];
+    var arg2 = process.argv[2];
+    var arg3 = process.argv[3];
     // check for file to play back
-    if (arg) {
-        console.log('arg exists.');
-        if (arg.search(/^\.*[^\.]+\.(mp4|m4v|mov)$/) !== -1) {
-            console.log('arg is valid.');
+    if (arg2) {
+        console.log('arg2 exists.');
+        if (arg2.search(/^\.*[^\.]+\.(mp4|m4v|mov)$/) !== -1) {
+            console.log('arg2 is valid.');
             // clear terminal, move cursor to top left and hide cursor
             console.log('\033[2J\033\033[H\033[?25l');
-            // start web server
-            startServer();
-            // check if the other video is playing
-            // play video
-            vidProc = spawn('omxplayer', [arg]);
-            vidProc.stdout.on('data', function (data) { vidProcLog += data; });
-            vidProc.stderr.on('data', function (data) { vidProcLog += data; });
+            // if another server address is provided...
+            if (arg3) {
+                // start web server
+                startServer();
+                playVideo();
+            } else {
+                playVideo();
+            }
         }
     } else {
         console.log('not enough arguments. a video filename must be provided.\ne.g.: node vidcomm.js filename.ext');
