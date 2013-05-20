@@ -27,7 +27,7 @@ var exitFunction = function (code) {
 var respond = function (data) {
     var headers = {
         'Content-Length': Buffer.byteLength(data),
-        'Content-Type': contentType || 'text/plain; charset=utf-8',
+        'Content-Type': 'text/plain; charset=utf-8',
         'Expires': (new Date(Date.now)).toUTCString()
     }
     res.writeHead(200, headers);
