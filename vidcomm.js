@@ -8,11 +8,7 @@ var localAddress,
     remoteAddress,
     port = 3000,
     req,
-    res,
-    comm = {
-        'playing': playing,
-        'ended': playVideo
-    };
+    res;
 
 // INIT ////////////////////////////////////
 
@@ -38,8 +34,9 @@ var parseRequest = function () {
     var url = urlmod.parse(req.url);
     if (url.href) {
         var cmd = url.href.slice(1);
-        console.log(comm[cmd]);
-        if (comm[cmd]) comm[cmd]();
+        console.log(cmd);
+        if (cmd === 'playing') playing();
+        else if (cmd === 'ended') playVideo();
         else respond('bad command');
     } else {
         console.log('invalid url');
