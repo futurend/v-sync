@@ -122,7 +122,7 @@ process.on('SIGINT', function () {
 // find local ip address
 require('child_process').exec('ifconfig eth0 | grep \'inet addr:\' | cut -d: -f2 | awk \'{ print $1}\'', function (error, stdout, stderr) {
     console.log(stdout);
-}
+});
 
 // START ///////////////////////////////////
 
