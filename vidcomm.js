@@ -7,7 +7,13 @@ var vidProc,
 var localAddress = '192.168.1.94',
     localPort = 3000,
     remoteAddress = '192.168.1.67',
-    remotePort = 3000;
+    remotePort = 3000,
+    req,
+    res,
+    comm = {
+        'playing?': playing,
+        'ended': playVideo
+    };
 
 // INIT ////////////////////////////////////
 
@@ -19,7 +25,7 @@ var exitFunction = function (code) {
     console.log('\033[?12l\033[?25h');
 }
 
-var respond = function (data, req, res, headers, callback) {
+var respond = function (data) {
     // var head = {
     //     'Content-Length': Buffer.byteLength(data),
     //     'Content-Type': contentType || 'text/plain; charset=utf-8',
@@ -32,27 +38,24 @@ var respond = function (data, req, res, headers, callback) {
     res.end(data);
 }
 
-var parseRequest = function (req_, res_) {
-    var url = urlmod.parse(req_.url);
+var parseRequest = function () {
+    var url = urlmod.parse(req.url);
     if (url.href) {
         console.log('valid url');
-        respond(url.href, req_, res_);
-        if (url.href === '/playing?') {
-            if (vidProc) respond('yes', req_, res_);
-            else respond('no', req_, res_);
-        } else if (url.href === '/play') {
-        } else if (url.href === '/stop') {
-        }
+        if (comm[url.href]) comm[url.href]();
+        else respond('0')
     } else {
         console.log('invalid url');
-        respond('{error:"invalid url"}', req_, res_);
+        respond('{error:"invalid url"}');
     }
 }
 
 var startServer = function () {
     console.log('starting local server.');
     // run local server
-    http.createServer(function (req, res) {
+    http.createServer(function (req_, res_) {
+        req = req_;
+        res = res_;
         if (req.method === 'GET') {
             req.on('close', function() {
                 console.log('error: connection closed');
@@ -62,15 +65,20 @@ var startServer = function () {
             });
             req.on('end', function() {
                 console.log('req.on end');
-                parseRequest(req, res);
+                parseRequest();
             });
         } else {
             console.log('error: no accepted HTTP method');
-            respond('', req, res);
+            respond('0');
         }
     }).listen(localPort, localAddress);
 
     console.log('server running at http://'+localAddress+':'+localPort);
+}
+
+var playing = function () {
+    if (vidProc) respond('1');
+    else respond('0');
 }
 
 var playVideo = function (filename) {
