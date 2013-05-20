@@ -71,6 +71,7 @@ var run = function () {
     // check for file to play back
     if (arg) {
         if (arg.search(/^[^\.]+\.(mp4|m4v|mov)$/) !== -1) {
+            console.log('arg is valid.');
             // clear terminal, move cursor to top left and hide cursor
             console.log('\033[2J\033\033[H\033[?25l');
             // start web server
