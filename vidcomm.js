@@ -2,6 +2,7 @@ var spawn = require('child_process').spawn,
     http = require('http'),
     urlmod = require('url');
 var vidProc,
+    player,
     vidProcLog = '',
     playing = false;
 var localAddress,
@@ -78,7 +79,7 @@ var playing = function () {
 var playVideo = function (filename) {
     // check if the other video is playing
     // play video
-    vidProc = spawn('omxplayer', [filename]);
+    vidProc = player === 'omxplayer' ? spawn('omxplayer', [filename]) : spawn('mplayer', ['-vm', filename]);
     vidProc.stdout.on('data', function (data) { vidProcLog += data; });
     vidProc.stderr.on('data', function (data) { vidProcLog += data; });
 }
@@ -88,17 +89,19 @@ var run = function () {
     var arg3 = process.argv[3];
     // check for file to play back
     if (arg2) {
-        console.log('arg2 exists.');
+        console.log('arg2 exists: '+arg2);
         if (arg2.search(/^\.*[^\.]+\.(mp4|m4v|mov)$/) !== -1) {
-            console.log('arg2 is valid.');
-            // clear terminal, move cursor to top left and hide cursor
+            // clear terminal, move cursor to top left and hide it
             console.log('\033[2J\033\033[H\033[?25l');
             // if another server address is provided...
             if (arg3) {
+                console.log('arg3 exists: '+arg3);
+                // validate the address
                 if (arg3.search(/192\.168\.1\.\d+/) !== -1) {
                     remoteAddress = arg3;
                     // find local ip address
                     require('child_process').exec('ifconfig eth0 | grep \'inet addr:\' | cut -d: -f2 | awk \'{ print $1}\'', function (error, stdout, stderr) {
+                        // validate the address
                         if (stdout.search(/192\.168\.1\.\d+/) !== -1) {
                             localAddress = stdout;
                             startServer();
@@ -121,23 +124,45 @@ var run = function () {
     }
 }
 
+var checkForDuplicates = function () {
+    // check whether other vidcomm process is running
+    require('child_process').exec('ps aux | grep '+player+' | grep -v grep', function (error, stdout, stderr) {
+        if (stdout.length) {
+            console.log('vidcomm is already running on this machine:');
+            console.log(stdout);
+            exitFunction();
+            process.exit(1);
+        } else {
+            console.log('vidcomm starting.');
+            run();
+        }
+    });
+}
+
 // handle ctrl-C gracefully
 process.on('SIGINT', function () {
+    console.log(' ');
     exitFunction();
     process.exit(1);
 });
 
 // START ///////////////////////////////////
 
-// check if other vidcomm process is running
-require('child_process').exec('ps aux | grep omxplayer | grep -v grep', function (error, stdout, stderr) {
-    if (stdout.length) {
-        console.log('vidcomm is already running on this machine. exiting.');
-        console.log(stdout);
-        exitFunction();
-        process.exit(1);
+// check which player is available on the system
+require('child_process').exec('which omxplayer', function (error, stdout, stderr) {
+    if (stdout[0] !== '/') {
+        require('child_process').exec('which mplayer', function (error, stdout, stderr) {
+            if (stdout[0] !== '/') {
+                console.log('no video player available.');
+                exitFunction();
+                process.exit(1);
+            } else {
+                player = 'mplayer';
+                checkForDuplicates();
+            }
+        });
     } else {
-        console.log('vidcomm starting.');
-        run();
+        player = 'omxplayer';
+        checkForDuplicates();
     }
 });
