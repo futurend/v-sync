@@ -105,7 +105,7 @@ var processArgv = function () {
 
     // if a configuration file was given
     if (conf) {
-        fs.readFileSync(conf, function (err, data) {
+        fs.readFile(conf, function (err, data) {
             if (err) throw err;
             console.log(data);
         })
