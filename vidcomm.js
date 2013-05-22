@@ -174,7 +174,7 @@ var parseArgv = function () {
     // if video files were given
     if (files.length) {
         // clear terminal, move cursor to top left and hide it
-        console.log('\033[2J\033\033[H\033[?25l');
+        // console.log('\033[2J\033\033[H\033[?25l');
     }
 
     // if a remote server address was given
