@@ -105,8 +105,8 @@ var processArgv = function () {
 
     // if a configuration file was given
     if (conf) {
-        fs.readFile(conf, {encoding:'utf-8'}, function (err, data) {
-            if (err) throw err;
+        var data = fs.readFileSync(conf, {encoding:'utf-8'});
+        if (data.length) {
             data.split('\n').forEach(function (val, idx, arr) {
                 if (val.search(/^\.*[^\.]+\.(mp4|m4v|mov)$/) !== -1) {
                     // video filename case
@@ -116,12 +116,13 @@ var processArgv = function () {
                     remoteAddress = val;
                 }
             });
-            console.log(conf);
-            console.log(files);
-            console.log(remoteAddress);
-        });
+        }
     }
     
+    console.log(conf);
+    console.log(files);
+    console.log(remoteAddress);
+
     // var arg2 = process.argv[2];
     // var arg3 = process.argv[3];
     // // check for file to play back
