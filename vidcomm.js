@@ -108,8 +108,8 @@ var parseServerResponse = function (data) {
 
 // establish video playing status
 var playing = function () {
-    if (vidProc) return 1;
-    else return 0;
+    if (vidProc) return '1';
+    else return '0';
 }
 
 // play video files
