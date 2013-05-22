@@ -104,7 +104,7 @@ var queryRemote = function (query) {
 
 // parse remote server's response to query
 var parseServerResponse = function (data) {
-    console.log('parse server response '+ data);
+    console.log('parse server response '+ (typeof data));
     if (data === 0) {
         // remote is not playing, play local file
         console.log('remote is not playing, play local file');
