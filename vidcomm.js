@@ -221,12 +221,12 @@ require('child_process').exec('which omxplayer', function (error, stdout, stderr
             } else {
                 player = 'mplayer';
                 console.log('player is '+player);
-                // checkForDuplicates();
+                checkForDuplicates();
             }
         });
     } else {
         player = 'omxplayer';
         console.log('player is '+player);
-        // checkForDuplicates();
+        checkForDuplicates();
     }
 });
