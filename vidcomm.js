@@ -34,6 +34,7 @@ var respond = function (data) {
 }
 
 var parseRequest = function () {
+    console.log(req.url);
     var url = urlmod.parse(req.url);
     if (url.href) {
         var cmd = url.href.slice(1);
@@ -71,6 +72,7 @@ var startServer = function () {
         }
     }).listen(port, localAddress);
     console.log('server running at http://'+localAddress+':'+port);
+    // query remote server for status
     queryRemote('playing');
 }
 
