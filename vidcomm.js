@@ -5,7 +5,8 @@ var spawn = require('child_process').spawn,
 var vidProc,
     player,
     vidProcLog = '',
-    files = [];
+    files = [],
+    currFile = 0;
 var localAddress = '',
     remoteAddress = '',
     port = 3000,
@@ -14,6 +15,7 @@ var localAddress = '',
 
 // INIT ////////////////////////////////////
 
+// standardized exit function
 var exitFunction = function (code) {
     console.log('exiting vidcomm');
     if (code) console.log('exited with code '+code);
@@ -22,38 +24,18 @@ var exitFunction = function (code) {
     console.log('\033[?12l\033[?25h');
 }
 
-var respond = function (data) {
-    var headers = {
-        'Content-Length': Buffer.byteLength(data),
-        'Content-Type': 'text/plain; charset=utf-8',
-        'Expires': (new Date(Date.now)).toUTCString()
-    }
-    res.writeHead(200, headers);
-    res.end(data);
-}
+// HTTP SERVER /////////////////////////////
 
-var parseRequest = function () {
-    var url = urlmod.parse(req.url);
-    if (url.href) {
-        var cmd = url.href.slice(1);
-        if (cmd === 'playing') playing();
-        else if (cmd === 'ended') playVideo();
-        else respond('bad command');
-    } else {
-        console.log('bad url');
-        respond('error: bad url');
-    }
-}
-
-var queryRemote = function (query) {
-    var url = 'http://'+remoteAddress+':'+port+'/'+query;
-    http.get(url, function(res_) {
-        console.log("Got response: " + res_.statusCode);
-        res_.on("data", function(chunk) {
-            console.log("BODY: " + chunk);
-        });
-    }).on('error', function(e) {
-        console.log("Got error: " + e.message);
+// find local ip address
+var findLocalAddress = function () {
+    require('child_process').exec('ifconfig eth0 | grep \'inet addr:\' | cut -d: -f2 | awk \'{ print $1}\'', function (error, stdout, stderr) {
+        if (stdout.search(/192\.168\.1\.\d+/) !== -1) {
+            localAddress = stdout;
+            startServer();
+        } else {
+            console.log('couldn\'t find local ip address. letting server down.');
+            playVideo();
+        }
     });
 }
 
@@ -76,35 +58,76 @@ var startServer = function () {
     queryRemote('playing');
 }
 
-// find local ip address
-var findLocalAddress = function () {
-    require('child_process').exec('ifconfig eth0 | grep \'inet addr:\' | cut -d: -f2 | awk \'{ print $1}\'', function (error, stdout, stderr) {
-        if (stdout.search(/192\.168\.1\.\d+/) !== -1) {
-            localAddress = stdout;
-            startServer();
-        } else {
-            console.log('couldn\'t find local ip address. letting server down.');
-            playVideo();
-        }
+// parse incoming http requests
+var parseRequest = function () {
+    var url = urlmod.parse(req.url);
+    if (url.href) {
+        var cmd = url.href.slice(1);
+        if (cmd === 'playing') respond(playing());
+        else if (cmd === 'ended') playVideo();
+        else respond('bad command');
+    } else {
+        console.log('bad url');
+        respond('error: bad url');
+    }
+}
+
+// respond to remote http requests
+var respond = function (data) {
+    var headers = {
+        'Content-Length': Buffer.byteLength(data),
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Expires': (new Date(Date.now)).toUTCString()
+    }
+    res.writeHead(200, headers);
+    res.end(data);
+}
+
+// REMOTE QUERIES //////////////////////////
+
+// query remote server
+var queryRemote = function (query) {
+    var url = 'http://'+remoteAddress+':'+port+'/'+query;
+    http.get(url, function(res_) {
+        res_.on("data", function (data) { parseServerResponse(data) });
+    }).on('error', function(e) {
+        console.log("Got error: " + e.message);
     });
 }
 
-var playing = function () {
-    if (vidProc) respond('1');
-    else respond('0');
+var parseServerResponse = function (data) {
+    if (data === '0') {
+        // remote is not playing, play local file
+        playVideo();
+    } else {
+        // wait for remote message, so, do nothing
+    }
 }
 
-var playVideo = function (filename) {
-    // check if the other video is playing
-    // play video
+// VIDEO ///////////////////////////////////
+
+// establish video playing status
+var playing = function () {
+    if (vidProc) return 1;
+    else return 0;
+}
+
+// play video files
+var playVideo = function () {
+    var filename = files[currFile];
     vidProc = player === 'omxplayer' ? spawn('omxplayer', ['-o local', filename]) : spawn('mplayer', ['-vm', filename]);
     vidProc.stdout.on('data', function (data) { vidProcLog += data; });
     vidProc.stderr.on('data', function (data) { vidProcLog += data; });
 }
 
-var processArgv = function () {
-    files = [];
+// PROCESS /////////////////////////////////
+
+// parse process' incoming arguments
+var parseArgv = function () {
     var conf;
+    files = [];
+
+    // parse arguments
     process.argv.forEach(function (val, idx, arr) {
         if (val.search(/^\.*[^\.]+\.conf$/) !== -1) {
             // configuration file case
@@ -141,51 +164,12 @@ var processArgv = function () {
         console.log('\033[2J\033\033[H\033[?25l');
     }
 
-    // if remote server address was given
+    // if a remote server address was given
     if (remoteAddress.length) {
         findLocalAddress();
     } else {
         playVideo();
     }
-
-
-    // var arg2 = process.argv[2];
-    // var arg3 = process.argv[3];
-    // // check for file to play back
-    // if (arg2) {
-    //     console.log('arg2 exists: '+arg2);
-    //     if (arg2.search(/^\.*[^\.]+\.(mp4|m4v|mov)$/) !== -1) {
-    //         // clear terminal, move cursor to top left and hide it
-    //         console.log('\033[2J\033\033[H\033[?25l');
-    //         // if another server address is provided...
-    //         if (arg3) {
-    //             console.log('arg3 exists: '+arg3);
-    //             // validate the address
-    //             if (arg3.search(/192\.168\.1\.\d+/) !== -1) {
-    //                 remoteAddress = arg3;
-    //                 // find local ip address
-    //                 require('child_process').exec('ifconfig eth0 | grep \'inet addr:\' | cut -d: -f2 | awk \'{ print $1}\'', function (error, stdout, stderr) {
-    //                     // validate the address
-    //                     if (stdout.search(/192\.168\.1\.\d+/) !== -1) {
-    //                         localAddress = stdout;
-    //                         startServer();
-    //                         playVideo(arg2);
-    //                     } else {
-    //                         console.log('couldn\'t find local ip address. letting server down.');
-    //                         playVideo(arg2);
-    //                     }
-    //                 });
-    //             } else {
-    //                 console.log('couldn\'t understand remote ip address. letting server down.');
-    //                 playVideo(arg2);
-    //             }
-    //         } else {
-    //             playVideo(arg2);
-    //         }
-    //     }
-    // } else {
-    //     console.log('not enough arguments. a video filename must be provided.\ne.g.: node vidcomm.js filename.ext');
-    // }
 }
 
 // check whether other vidcomm process is running on the system
@@ -198,7 +182,7 @@ var checkForDuplicates = function () {
             process.exit(1);
         } else {
             console.log('vidcomm starting.');
-            processArgv();
+            parseArgv();
         }
     });
 }
