@@ -1,6 +1,7 @@
 var spawn = require('child_process').spawn,
     http = require('http'),
-    urlmod = require('url');
+    urlmod = require('url'),
+    fs = require('fs');
 var vidProc,
     player,
     vidProcLog = '',
@@ -101,10 +102,14 @@ var processArgv = function () {
             remoteAddress = val;
         }
     });
-    console.log(conf);
-    console.log(remoteAddress);
-    console.log(files);
-    
+
+    // if a configuration file was given
+    if (conf) {
+        fs.readFileSync(conf, function (err, data) {
+            if (err) throw err;
+            console.log(data);
+        })
+    }
     
     // var arg2 = process.argv[2];
     // var arg3 = process.argv[3];
