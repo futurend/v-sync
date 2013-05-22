@@ -127,7 +127,7 @@ var playing = function () {
 var playVideo = function () {
     var filename = files[currFile];
     console.log('play video '+filename);
-    vidProc = (player === 'omxplayer') ? spawn('omxplayer', ['-o local', filename]) : spawn('mplayer', ['-vm', filename]);
+    vidProc = (player === 'omxplayer') ? spawn('omxplayer', ['-o', 'local', filename]) : spawn('mplayer', ['-vm', filename]);
     vidProc.stdout.on('data', function (data) { vidProcLog += data; });
     vidProc.stderr.on('data', function (data) { vidProcLog += data; });
 }
