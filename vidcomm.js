@@ -213,19 +213,19 @@ process.on('SIGINT', function () {
 // check which player is available on the system
 require('child_process').exec('which omxplayer', function (error, stdout, stderr) {
     console.log(stdout);
-    if (stdout[0] !== '/') {
-        require('child_process').exec('which mplayer', function (error, stdout, stderr) {
-            if (stdout[0] !== '/') {
-                console.log('no video player available.');
-                exitFunction();
-                process.exit(1);
-            } else {
-                player = 'mplayer';
-                checkForDuplicates();
-            }
-        });
-    } else {
-        player = 'omxplayer';
-        checkForDuplicates();
-    }
+    // if (stdout[0] !== '/') {
+    //     require('child_process').exec('which mplayer', function (error, stdout, stderr) {
+    //         if (stdout[0] !== '/') {
+    //             console.log('no video player available.');
+    //             exitFunction();
+    //             process.exit(1);
+    //         } else {
+    //             player = 'mplayer';
+    //             checkForDuplicates();
+    //         }
+    //     });
+    // } else {
+    //     player = 'omxplayer';
+    //     checkForDuplicates();
+    // }
 });
