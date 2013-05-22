@@ -96,7 +96,7 @@ var queryRemote = function (query) {
     console.log('query remote '+ query);
     var url = 'http://'+remoteAddress+':'+port+'/'+query;
     http.get(url, function(res_) {
-        res_.on("data", function (data) { parseServerResponse(data) });
+        res_.on('data', function (data) { parseServerResponse(data) });
     }).on('error', function(e) {
         console.log("Got error: " + e.message);
     });
@@ -110,6 +110,7 @@ var parseServerResponse = function (data) {
         console.log('remote is not playing, play local file');
         playVideo();
     } else {
+        console.log('remote is playing, wait for remote message, so, do nothing');
         // wait for remote message, so, do nothing
     }
 }
