@@ -116,12 +116,11 @@ var processArgv = function () {
                     remoteAddress = val;
                 }
             });
-        })
+            console.log(conf);
+            console.log(files);
+            console.log(remoteAddress);
+        });
     }
-    
-    console.log(conf);
-    console.log(files);
-    console.log(remoteAddress);
     
     // var arg2 = process.argv[2];
     // var arg3 = process.argv[3];
