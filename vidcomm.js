@@ -28,6 +28,7 @@ var exitFunction = function (code) {
 
 // find local ip address
 var findLocalAddress = function () {
+    console.log('find local address');
     require('child_process').exec('ifconfig eth0 | grep \'inet addr:\' | cut -d: -f2 | awk \'{ print $1}\'', function (error, stdout, stderr) {
         if (stdout.search(/192\.168\.1\.\d+/) !== -1) {
             localAddress = stdout;
@@ -41,6 +42,7 @@ var findLocalAddress = function () {
 
 // start local http server
 var startServer = function () {
+    console.log('start server');
     http.createServer(function (req_, res_) {
         req = req_;
         res = res_;
@@ -60,6 +62,7 @@ var startServer = function () {
 
 // parse incoming http requests
 var parseRequest = function () {
+    console.log('parse request');
     var url = urlmod.parse(req.url);
     if (url.href) {
         var cmd = url.href.slice(1);
@@ -74,6 +77,7 @@ var parseRequest = function () {
 
 // respond to remote http requests
 var respond = function (data) {
+    console.log('respond');
     var headers = {
         'Content-Length': Buffer.byteLength(data),
         'Content-Type': 'text/plain; charset=utf-8',
@@ -87,6 +91,7 @@ var respond = function (data) {
 
 // query remote server
 var queryRemote = function (query) {
+    console.log('query remote');
     var url = 'http://'+remoteAddress+':'+port+'/'+query;
     http.get(url, function(res_) {
         res_.on("data", function (data) { parseServerResponse(data) });
@@ -96,6 +101,7 @@ var queryRemote = function (query) {
 }
 
 var parseServerResponse = function (data) {
+    console.log('parse server response');
     if (data === '0') {
         // remote is not playing, play local file
         playVideo();
@@ -114,8 +120,9 @@ var playing = function () {
 
 // play video files
 var playVideo = function () {
+    console.log('play video');
     var filename = files[currFile];
-    vidProc = player === 'omxplayer' ? spawn('omxplayer', ['-o local', filename]) : spawn('mplayer', ['-vm', filename]);
+    vidProc = (player === 'omxplayer') ? spawn('omxplayer', ['-o local', filename]) : spawn('mplayer', ['-vm', filename]);
     vidProc.stdout.on('data', function (data) { vidProcLog += data; });
     vidProc.stderr.on('data', function (data) { vidProcLog += data; });
 }
@@ -124,6 +131,7 @@ var playVideo = function () {
 
 // parse process' incoming arguments
 var parseArgv = function () {
+    console.log('parse argv');
     var conf;
     files = [];
 
@@ -174,6 +182,7 @@ var parseArgv = function () {
 
 // check whether other vidcomm process is running on the system
 var checkForDuplicates = function () {
+    console.log('check for duplicates');
     require('child_process').exec('ps aux | grep '+player+' | grep -v grep', function (error, stdout, stderr) {
         if (stdout.length) {
             console.log('a video player is already running on this machine.');
