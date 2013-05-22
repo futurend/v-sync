@@ -88,8 +88,8 @@ var findLocalAddress = function () {
 }
 
 var playing = function () {
-    if (vidProc) respond('1');
-    else respond('0');
+    if (vidProc) respond('bananas');
+    else respond('alhos');
 }
 
 var playVideo = function (filename) {
