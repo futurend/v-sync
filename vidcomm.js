@@ -107,10 +107,21 @@ var processArgv = function () {
     if (conf) {
         fs.readFile(conf, {encoding:'utf-8'}, function (err, data) {
             if (err) throw err;
-            var d = data.split('\n');
-            console.log(d);
+            data.split('\n').forEach(function (val, idx, arr) {
+                if (val.search(/^\.*[^\.]+\.(mp4|m4v|mov)$/) !== -1) {
+                    // video filename case
+                    files.push(val);
+                } else if (val.search(/192\.168\.1\.\d+/) !== -1) {
+                    // remote address case
+                    remoteAddress = val;
+                }
+            });
         })
     }
+    
+    console.log(conf);
+    console.log(files);
+    console.log(remoteAddress);
     
     // var arg2 = process.argv[2];
     // var arg3 = process.argv[3];
