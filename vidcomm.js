@@ -14,9 +14,9 @@ var localAddress,
 // INIT ////////////////////////////////////
 
 var exitFunction = function (code) {
-    console.log('exiting');
+    console.log('exiting vidcomm');
     if (code) console.log('exited with code '+code);
-    console.log(vidProcLog);
+    if (vidProcLog.length) console.log(vidProcLog);
     // show cursor
     console.log('\033[?12l\033[?25h');
 }
@@ -41,7 +41,7 @@ var parseRequest = function () {
         else respond('bad command');
     } else {
         console.log('invalid url');
-        respond('{error:"invalid url"}');
+        respond('error: invalid url');
     }
 }
 
@@ -112,7 +112,7 @@ var run = function () {
                         }
                     });
                 } else {
-                    console.log('couldn\'t get remote ip address. letting server down.');
+                    console.log('couldn\'t understand remote ip address. letting server down.');
                     playVideo(arg2);
                 }
             } else {
@@ -124,11 +124,11 @@ var run = function () {
     }
 }
 
+// check whether other vidcomm process is running on the system
 var checkForDuplicates = function () {
-    // check whether other vidcomm process is running
     require('child_process').exec('ps aux | grep '+player+' | grep -v grep', function (error, stdout, stderr) {
         if (stdout.length) {
-            console.log('vidcomm is already running on this machine:');
+            console.log('a video player is already running on this machine.');
             console.log(stdout);
             exitFunction();
             process.exit(1);
