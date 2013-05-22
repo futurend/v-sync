@@ -5,7 +5,6 @@ var spawn = require('child_process').spawn,
 var vidProc,
     player,
     vidProcLog = '',
-    playing = false,
     files = [];
 var localAddress = '',
     remoteAddress = '',
@@ -34,17 +33,15 @@ var respond = function (data) {
 }
 
 var parseRequest = function () {
-    console.log(req.url);
     var url = urlmod.parse(req.url);
     if (url.href) {
         var cmd = url.href.slice(1);
-        console.log(cmd);
         if (cmd === 'playing') playing();
         else if (cmd === 'ended') playVideo();
         else respond('bad command');
     } else {
-        console.log('invalid url');
-        respond('error: invalid url');
+        console.log('bad url');
+        respond('error: bad url');
     }
 }
 
