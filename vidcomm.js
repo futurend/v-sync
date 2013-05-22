@@ -53,7 +53,7 @@ var startServer = function () {
             req.on('end', function() { parseRequest(); });
         } else {
             console.log('error: no accepted HTTP method');
-            respond('0');
+            respond('no');
         }
     }).listen(port, localAddress);
     console.log('server running at http://'+localAddress+':'+port);
@@ -104,8 +104,8 @@ var queryRemote = function (query) {
 
 // parse remote server's response to query
 var parseServerResponse = function (data) {
-    console.log('parse server response '+ (typeof data));
-    if (data === 0) {
+    console.log('parse server response '+ data);
+    if (data === 'no') {
         // remote is not playing, play local file
         console.log('remote is not playing, play local file');
         playVideo();
@@ -118,8 +118,8 @@ var parseServerResponse = function (data) {
 
 // establish video playing status
 var playing = function () {
-    if (vidProc) return '1';
-    else return '0';
+    if (vidProc) return 'yes';
+    else return 'no';
 }
 
 // play video files
