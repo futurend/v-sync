@@ -49,6 +49,7 @@ var parseRequest = function () {
 
 var queryRemote = function (query) {
     var url = 'http://'+remoteAddress+':'+port+'/'+query;
+    console.log(url);
     http.get(url, function(res_) {
       console.log("Got response: " + res_.statusCode);
     }).on('error', function(e) {
