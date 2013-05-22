@@ -47,9 +47,9 @@ var parseRequest = function () {
 
 var queryRemote = function (query) {
     var url = 'http://'+remoteAddress+':'+port+'/'+query;
-    console.log(url);
     http.get(url, function(res_) {
       console.log("Got response: " + res_.statusCode);
+      console.log(res_);
     }).on('error', function(e) {
       console.log("Got error: " + e.message);
     });
@@ -62,7 +62,7 @@ var startServer = function () {
         res = res_;
         if (req.method === 'GET') {
             req.on('close', function() { console.log('error: connection closed'); });
-            req.on('data', function(data) { console.log('data is comming...'); });
+            req.on('data', function(data) { /* void */ });
             req.on('end', function() { parseRequest(); });
         } else {
             console.log('error: no accepted HTTP method');
