@@ -6,9 +6,9 @@ var vidProc,
     player,
     vidProcLog = '',
     playing = false,
-    files;
-var localAddress,
-    remoteAddress,
+    files = [];
+var localAddress = '',
+    remoteAddress = '',
     port = 3000,
     req,
     res;
@@ -47,30 +47,43 @@ var parseRequest = function () {
     }
 }
 
+var queryRemote = function (query) {
+    var url = 'http://'+remoteAddress+':'+port+'/'+query;
+    http.get(url, function(res_) {
+      console.log("Got response: " + res_.statusCode);
+    }).on('error', function(e) {
+      console.log("Got error: " + e.message);
+    });
+}
+
+// start local http server
 var startServer = function () {
-    console.log('starting local server.');
-    // run local server
     http.createServer(function (req_, res_) {
         req = req_;
         res = res_;
         if (req.method === 'GET') {
-            req.on('close', function() {
-                console.log('error: connection closed');
-            });
-            req.on('data', function() {
-                console.log('warn: data comming');
-            });
-            req.on('end', function() {
-                console.log('req.on end');
-                parseRequest();
-            });
+            req.on('close', function() { console.log('error: connection closed'); });
+            req.on('end', function() { parseRequest(); });
         } else {
             console.log('error: no accepted HTTP method');
             respond('0');
         }
     }).listen(port, localAddress);
-
     console.log('server running at http://'+localAddress+':'+port);
+    queryRemote('playing');
+}
+
+// find local ip address
+var findLocalAddress = function () {
+    require('child_process').exec('ifconfig eth0 | grep \'inet addr:\' | cut -d: -f2 | awk \'{ print $1}\'', function (error, stdout, stderr) {
+        if (stdout.search(/192\.168\.1\.\d+/) !== -1) {
+            localAddress = stdout;
+            startServer();
+        } else {
+            console.log('couldn\'t find local ip address. letting server down.');
+            playVideo();
+        }
+    });
 }
 
 var playing = function () {
@@ -119,9 +132,19 @@ var processArgv = function () {
         }
     }
     
-    console.log(conf);
-    console.log(files);
-    console.log(remoteAddress);
+    // if video files were given
+    if (files.length) {
+        // clear terminal, move cursor to top left and hide it
+        console.log('\033[2J\033\033[H\033[?25l');
+    }
+
+    // if remote server address was given
+    if (remoteAddress.length) {
+        findLocalAddress();
+    } else {
+        playVideo();
+    }
+
 
     // var arg2 = process.argv[2];
     // var arg3 = process.argv[3];
