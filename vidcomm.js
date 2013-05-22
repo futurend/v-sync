@@ -107,7 +107,8 @@ var processArgv = function () {
     if (conf) {
         fs.readFile(conf, {encoding:'utf-8'}, function (err, data) {
             if (err) throw err;
-            console.log(data);
+            var d = data.split('\n');
+            console.log(d);
         })
     }
     
