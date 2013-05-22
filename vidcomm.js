@@ -65,6 +65,7 @@ var startServer = function () {
         res = res_;
         if (req.method === 'GET') {
             req.on('close', function() { console.log('error: connection closed'); });
+            req.on('data', function(data) { console.log('data is comming...'); });
             req.on('end', function() { parseRequest(); });
         } else {
             console.log('error: no accepted HTTP method');
