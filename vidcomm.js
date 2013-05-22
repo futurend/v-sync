@@ -32,6 +32,7 @@ var findLocalAddress = function () {
     require('child_process').exec('ifconfig eth0 | grep \'inet addr:\' | cut -d: -f2 | awk \'{ print $1}\'', function (error, stdout, stderr) {
         if (stdout.search(/192\.168\.1\.\d+/) !== -1) {
             localAddress = stdout;
+            console.log(localAddress);
             startServer();
         } else {
             console.log('couldn\'t find local ip address. letting server down.');
@@ -66,6 +67,7 @@ var parseRequest = function () {
     var url = urlmod.parse(req.url);
     if (url.href) {
         var cmd = url.href.slice(1);
+        console.log(cmd);
         if (cmd === 'playing') respond(playing());
         else if (cmd === 'ended') playVideo();
         else respond('bad command');
@@ -77,7 +79,7 @@ var parseRequest = function () {
 
 // respond to remote http requests
 var respond = function (data) {
-    console.log('respond');
+    console.log('respond '+ data);
     var headers = {
         'Content-Length': Buffer.byteLength(data),
         'Content-Type': 'text/plain; charset=utf-8',
@@ -91,7 +93,7 @@ var respond = function (data) {
 
 // query remote server
 var queryRemote = function (query) {
-    console.log('query remote');
+    console.log('query remote '+ query);
     var url = 'http://'+remoteAddress+':'+port+'/'+query;
     http.get(url, function(res_) {
         res_.on("data", function (data) { parseServerResponse(data) });
@@ -101,7 +103,7 @@ var queryRemote = function (query) {
 }
 
 var parseServerResponse = function (data) {
-    console.log('parse server response');
+    console.log('parse server response '+ data);
     if (data === '0') {
         // remote is not playing, play local file
         playVideo();
@@ -120,8 +122,8 @@ var playing = function () {
 
 // play video files
 var playVideo = function () {
-    console.log('play video');
     var filename = files[currFile];
+    console.log('play video '+filename);
     vidProc = (player === 'omxplayer') ? spawn('omxplayer', ['-o local', filename]) : spawn('mplayer', ['-vm', filename]);
     vidProc.stdout.on('data', function (data) { vidProcLog += data; });
     vidProc.stderr.on('data', function (data) { vidProcLog += data; });
