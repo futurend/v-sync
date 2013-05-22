@@ -96,7 +96,7 @@ var processArgv = function () {
         } else if (val.search(/^\.*[^\.]+\.(mp4|m4v|mov)$/) !== -1) {
             // video filename case
             files.push(val);
-        } else if (arg3.search(/192\.168\.1\.\d+/) !== -1) {
+        } else if (val.search(/192\.168\.1\.\d+/) !== -1) {
             // remote address case
             remoteAddress = val;
         }
