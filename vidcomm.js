@@ -48,10 +48,11 @@ var parseRequest = function () {
 var queryRemote = function (query) {
     var url = 'http://'+remoteAddress+':'+port+'/'+query;
     http.get(url, function(res_) {
-      console.log("Got response: " + res_.statusCode);
-      console.log(res_);
+        console.log("Got response: " + res_.statusCode);
+    }).on('data', function(data) {
+        console.log("Got data: " + data);
     }).on('error', function(e) {
-      console.log("Got error: " + e.message);
+        console.log("Got error: " + e.message);
     });
 }
 
@@ -88,8 +89,8 @@ var findLocalAddress = function () {
 }
 
 var playing = function () {
-    if (vidProc) respond('bananas');
-    else respond('alhos');
+    if (vidProc) respond('1');
+    else respond('0');
 }
 
 var playVideo = function (filename) {
