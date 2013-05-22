@@ -49,7 +49,7 @@ var queryRemote = function (query) {
     var url = 'http://'+remoteAddress+':'+port+'/'+query;
     http.get(url, function(res_) {
         console.log("Got response: " + res_.statusCode);
-        res.on("data", function(chunk) {
+        res_.on("data", function(chunk) {
             console.log("BODY: " + chunk);
         });
     }).on('error', function(e) {
