@@ -49,8 +49,9 @@ var queryRemote = function (query) {
     var url = 'http://'+remoteAddress+':'+port+'/'+query;
     http.get(url, function(res_) {
         console.log("Got response: " + res_.statusCode);
-    }).on('data', function(data) {
-        console.log("Got data: " + data);
+        res.on("data", function(chunk) {
+            console.log("BODY: " + chunk);
+        });
     }).on('error', function(e) {
         console.log("Got error: " + e.message);
     });
