@@ -2,6 +2,7 @@ var spawn = require('child_process').spawn,
     http = require('http'),
     urlmod = require('url'),
     fs = require('fs');
+var logLevel = 1;
 var vidProc,
     player,
     vidProcLog = '',
@@ -25,18 +26,22 @@ var exitFunction = function (code) {
     console.log('\033[?12l\033[?25h');
 }
 
+var echo = function (msg) {
+    if (logLevel) console.log(msg);
+}
+
 // HTTP SERVER /////////////////////////////
 
 // find local ip address
 var findLocalAddress = function () {
-    console.log('find local address');
+    echo('find local address');
     require('child_process').exec('ifconfig eth0 | grep \'inet addr:\' | cut -d: -f2 | awk \'{ print $1}\'', function (error, stdout, stderr) {
         if (stdout.search(/192\.168\.1\.\d+/) !== -1) {
             localAddress = stdout;
-            console.log(localAddress);
+            echo(localAddress);
             startServer();
         } else {
-            console.log('couldn\'t find local ip address. letting server down.');
+            echo('couldn\'t find local ip address. letting server down.');
             playNextVideo();
         }
     });
@@ -44,43 +49,43 @@ var findLocalAddress = function () {
 
 // start local http server
 var startServer = function () {
-    console.log('start server');
+    echo('start server');
     http.createServer(function (req_, res_) {
         req = req_;
         res = res_;
         if (req.method === 'GET') {
-            req.on('close', function() { console.log('error: connection closed'); });
+            req.on('close', function() { echo('error: connection closed'); });
             req.on('data', function(data) { /* void */ });
             req.on('end', function() { parseRequest(); });
         } else {
-            console.log('error: no accepted HTTP method');
+            echo('error: no accepted HTTP method');
             respond('no');
         }
     }).listen(port, localAddress);
-    console.log('server running at http://'+localAddress+':'+port);
+    echo('server running at http://'+localAddress+':'+port);
     // query remote server for status
     queryRemote('playing');
 }
 
 // parse incoming http requests
 var parseRequest = function () {
-    console.log('parse request');
+    echo('parse request');
     var url = urlmod.parse(req.url);
     if (url.href) {
         var cmd = url.href.slice(1);
-        console.log(cmd);
+        echo(cmd);
         if (cmd === 'playing') respond(isPlaying());
         else if (cmd === 'ended') playNextVideo();
         else respond('bad command');
     } else {
-        console.log('bad url');
+        echo('bad url '+url);
         respond('error: bad url');
     }
 }
 
 // respond to remote http requests
 var respond = function (data) {
-    console.log('respond '+ data);
+    echo('respond '+ data);
     var headers = {
         'Content-Length': Buffer.byteLength(data),
         'Content-Type': 'text/plain; charset=utf-8',
@@ -94,24 +99,24 @@ var respond = function (data) {
 
 // query remote server
 var queryRemote = function (query) {
-    console.log('query remote '+ query);
+    echo('query remote '+ query);
     var url = 'http://'+remoteAddress+':'+port+'/'+query;
     http.get(url, function(res_) {
         res_.on('data', function (data) { parseServerResponse(data) });
     }).on('error', function(e) {
-        console.log("Got error: " + e.message);
+        echo("got error: " + e.message);
     });
 }
 
 // parse remote server's response to query
 var parseServerResponse = function (data) {
-    console.log('parse server response '+ data);
+    echo('parse server response '+ data);
     if (data == 'no') {
         // remote is not playing, play local file
-        console.log('remote is not playing, play local file');
+        echo('remote is not playing, play local file');
         playNextVideo();
     } else {
-        console.log('remote is playing, wait for remote message, so, do nothing');
+        echo('remote is playing, wait for remote message, so, do nothing');
         // wait for remote message, so, do nothing
     }
 }
@@ -137,13 +142,13 @@ var playNextVideo = function () {
         process.exit(0);
     } else {
         playing = true;
-        console.log('play video '+filename);
+        echo('play video '+filename);
         vidProc = (player === 'omxplayer') ? spawn('omxplayer', ['-o', 'local', filename]) : spawn('mplayer', ['-vm', filename]);
         vidProc.stdout.on('data', function (data) { vidProcLog += data; });
         vidProc.stderr.on('data', function (data) { vidProcLog += data; });
         vidProc.on('exit', function (code) {
             playing = false;
-            console.log(player+' exited with code '+code);
+            echo(player+' exited with code '+code);
             queryRemote('ended');
         });
     }
@@ -153,7 +158,7 @@ var playNextVideo = function () {
 
 // parse process' incoming arguments
 var parseArgv = function () {
-    console.log('parse argv');
+    echo('parse argv');
     var conf;
     files = [];
 
@@ -215,7 +220,7 @@ var parseArgv = function () {
 
 // check whether other vidcomm process is running on the system
 var checkForDuplicates = function () {
-    console.log('check for duplicates');
+    echo('check for duplicates');
     require('child_process').exec('ps aux | grep '+player+' | grep -v grep', function (error, stdout, stderr) {
         if (stdout.length) {
             console.log('a video player is already running on this machine.');
@@ -223,7 +228,7 @@ var checkForDuplicates = function () {
             exitFunction();
             process.exit(1);
         } else {
-            console.log('vidcomm starting.');
+            echo('vidcomm starting.');
             parseArgv();
         }
     });
@@ -248,13 +253,13 @@ require('child_process').exec('which omxplayer', function (error, stdout, stderr
                 process.exit(1);
             } else {
                 player = 'mplayer';
-                console.log('player is '+player);
+                echo('player is '+player);
                 checkForDuplicates();
             }
         });
     } else {
         player = 'omxplayer';
-        console.log('player is '+player);
+        echo('player is '+player);
         checkForDuplicates();
     }
 });
