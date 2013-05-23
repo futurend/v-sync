@@ -130,6 +130,7 @@ var playVideo = function () {
     vidProc = (player === 'omxplayer') ? spawn('omxplayer', ['-o', 'local', filename]) : spawn('mplayer', ['-vm', filename]);
     vidProc.stdout.on('data', function (data) { vidProcLog += data; });
     vidProc.stderr.on('data', function (data) { vidProcLog += data; });
+    vidProc.on('exit', function (code) { console.log(player+' exited with code '+code); });
 }
 
 // PROCESS /////////////////////////////////
