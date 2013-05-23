@@ -125,7 +125,11 @@ var playing = function () {
 
 // play video files
 var playNextVideo = function () {
+    // next file to play
     var filename = files[currFile++];
+    // if it doesn't exist, reset filename to the first one
+    if (!filename) filename = files[0];
+    // play only if the file exists
     if (!filename) {
         console.log('vidcomm playback ended');
         exitFunction();
