@@ -6,7 +6,8 @@ var vidProc,
     player,
     vidProcLog = '',
     files = [],
-    currFile = 0;
+    currFile = 0,
+    playing = false;
 var localAddress = '',
     remoteAddress = '',
     port = 3000,
@@ -68,7 +69,7 @@ var parseRequest = function () {
     if (url.href) {
         var cmd = url.href.slice(1);
         console.log(cmd);
-        if (cmd === 'playing') respond(playing());
+        if (cmd === 'playing') respond(isPlaying());
         else if (cmd === 'ended') playNextVideo();
         else respond('bad command');
     } else {
@@ -118,8 +119,8 @@ var parseServerResponse = function (data) {
 // VIDEO ///////////////////////////////////
 
 // establish video playing status
-var playing = function () {
-    if (vidProc) return 'yes';
+var isPlaying = function () {
+    if (playing) return 'yes';
     else return 'no';
 }
 
@@ -135,11 +136,13 @@ var playNextVideo = function () {
         exitFunction();
         process.exit(0);
     } else {
+        playing = true;
         console.log('play video '+filename);
         vidProc = (player === 'omxplayer') ? spawn('omxplayer', ['-o', 'local', filename]) : spawn('mplayer', ['-vm', filename]);
         vidProc.stdout.on('data', function (data) { vidProcLog += data; });
         vidProc.stderr.on('data', function (data) { vidProcLog += data; });
         vidProc.on('exit', function (code) {
+            playing = false;
             console.log(player+' exited with code '+code);
             queryRemote('ended');
         });
