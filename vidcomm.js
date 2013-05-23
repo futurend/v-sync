@@ -142,19 +142,24 @@ var parseArgv = function () {
     files = [];
 
     // parse arguments
-    process.argv.forEach(function (val, idx, arr) {
-        if (val.search(/^\.*[^\.]+\.conf$/) !== -1) {
-            // configuration file case
-            conf = val;
-            // readConf();
-        } else if (val.search(/^\.*[^\.]+\.(mp4|m4v|mov)$/) !== -1) {
-            // video filename case
-            files.push(val);
-        } else if (val.search(/192\.168\.1\.\d+/) !== -1) {
-            // remote address case
-            remoteAddress = val;
-        }
-    });
+    if (!process.argv.length) {
+        // no arguments case
+        conf = 'vidcomm.conf';
+    } else {
+        process.argv.forEach(function (val, idx, arr) {
+            if (val.search(/^\.*[^\.]+\.conf$/) !== -1) {
+                // configuration file case
+                conf = val;
+                // readConf();
+            } else if (val.search(/^\.*[^\.]+\.(mp4|m4v|mov)$/) !== -1) {
+                // video filename case
+                files.push(val);
+            } else if (val.search(/192\.168\.1\.\d+/) !== -1) {
+                // remote address case
+                remoteAddress = val;
+            }
+        });
+    }
 
     // if a configuration file was given
     if (conf) {
@@ -176,13 +181,19 @@ var parseArgv = function () {
     if (files.length) {
         // clear terminal, move cursor to top left and hide it
         // console.log('\033[2J\033\033[H\033[?25l');
+
+        // if a remote server address was given
+        if (remoteAddress.length) {
+            findLocalAddress();
+        } else {
+            playVideo();
+        }
     }
 
-    // if a remote server address was given
-    if (remoteAddress.length) {
-        findLocalAddress();
-    } else {
-        playVideo();
+    // failsafe
+    if (!conf && !files.length) {
+        exitFunction();
+        process.exit(1);
     }
 }
 
