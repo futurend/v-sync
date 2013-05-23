@@ -141,10 +141,8 @@ var parseArgv = function () {
     var conf;
     files = [];
 
-    console.log(process.argv.length);
-
     // parse arguments
-    if (process.argv.length < 2) {
+    if (process.argv.length < 3) {
         // no arguments case
         conf = 'vidcomm.conf';
     } else {
