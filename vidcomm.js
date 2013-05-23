@@ -36,7 +36,7 @@ var findLocalAddress = function () {
             startServer();
         } else {
             console.log('couldn\'t find local ip address. letting server down.');
-            playVideo();
+            playNextVideo();
         }
     });
 }
@@ -69,7 +69,7 @@ var parseRequest = function () {
         var cmd = url.href.slice(1);
         console.log(cmd);
         if (cmd === 'playing') respond(playing());
-        else if (cmd === 'ended') playVideo();
+        else if (cmd === 'ended') playNextVideo();
         else respond('bad command');
     } else {
         console.log('bad url');
@@ -108,7 +108,7 @@ var parseServerResponse = function (data) {
     if (data == 'no') {
         // remote is not playing, play local file
         console.log('remote is not playing, play local file');
-        playVideo();
+        playNextVideo();
     } else {
         console.log('remote is playing, wait for remote message, so, do nothing');
         // wait for remote message, so, do nothing
@@ -124,13 +124,22 @@ var playing = function () {
 }
 
 // play video files
-var playVideo = function () {
-    var filename = files[currFile];
-    console.log('play video '+filename);
-    vidProc = (player === 'omxplayer') ? spawn('omxplayer', ['-o', 'local', filename]) : spawn('mplayer', ['-vm', filename]);
-    vidProc.stdout.on('data', function (data) { vidProcLog += data; });
-    vidProc.stderr.on('data', function (data) { vidProcLog += data; });
-    vidProc.on('exit', function (code) { console.log(player+' exited with code '+code); });
+var playNextVideo = function () {
+    var filename = files[currFile++];
+    if (!filename) {
+        console.log('vidcomm playback ended');
+        exitFunction();
+        process.exit(0);
+    } else {
+        console.log('play video '+filename);
+        vidProc = (player === 'omxplayer') ? spawn('omxplayer', ['-o', 'local', filename]) : spawn('mplayer', ['-vm', filename]);
+        vidProc.stdout.on('data', function (data) { vidProcLog += data; });
+        vidProc.stderr.on('data', function (data) { vidProcLog += data; });
+        vidProc.on('exit', function (code) {
+            console.log(player+' exited with code '+code);
+            queryRemote('ended');
+        });
+    }
 }
 
 // PROCESS /////////////////////////////////
@@ -186,7 +195,7 @@ var parseArgv = function () {
         if (remoteAddress.length) {
             findLocalAddress();
         } else {
-            playVideo();
+            playNextVideo();
         }
     }
 
