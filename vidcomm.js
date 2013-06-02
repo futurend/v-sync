@@ -135,7 +135,7 @@ var isPlaying = function () {
 // play video files
 var playNextVideo = function () {
     // next file to play
-    var filename = files[currFile++];
+    var filename = files[++currFile];
     // if it doesn't exist, reset filename to the first one
     if (!filename) {
         currFile = 0;
