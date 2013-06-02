@@ -36,7 +36,7 @@ var echo = function (msg) {
 var findLocalAddress = function () {
     require('child_process').exec('ifconfig eth0 | grep \'inet addr:\' | cut -d: -f2 | awk \'{ print $1}\'', function (error, stdout, stderr) {
         if (stdout.search(/192\.168\.1\.\d+/) !== -1) {
-            localAddress = stdout;
+            localAddress = stdout.trim();
             echo('local ip address is '+localAddress);
             startServer();
         } else {
