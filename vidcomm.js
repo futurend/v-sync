@@ -25,8 +25,7 @@ var exitFunction = function (code) {
     process.exit();
 }
 
-var echo = function (msg, level) {
-    if (!level) level = 1;
+var echo = function (msg) {
     if (level <= logLevel) console.log(msg);
 }
 
