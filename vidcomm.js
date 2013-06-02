@@ -150,8 +150,8 @@ var playNextVideo = function () {
         echo('play video: '+filename);
         echo('..');
         vidProc = (player === 'omxplayer') ? spawn('omxplayer', ['-o', 'local', filename]) : spawn('mplayer', ['-vm', filename]);
-        vidProc.stdout.on('data', function (data) { echo(data); });
-        vidProc.stderr.on('data', function (data) { echo(data); });
+        vidProc.stdout.on('data', function (data) { echo(data.toString()); });
+        vidProc.stderr.on('data', function (data) { echo(data.toString()); });
         vidProc.on('exit', function (code) {
             echo(player+' exited with code '+code);
             playing = false;
