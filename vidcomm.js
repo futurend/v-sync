@@ -26,7 +26,7 @@ var exitFunction = function (code) {
 }
 
 var echo = function (msg) {
-    if (level <= logLevel) console.log(msg);
+    if (logLevel > 0) console.log(msg);
 }
 
 // HTTP SERVER /////////////////////////////
