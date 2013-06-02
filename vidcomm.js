@@ -23,6 +23,7 @@ var exitFunction = function (code) {
     if (code) console.log('exited with code '+code);
     // show cursor
     console.log('\033[?12l\033[?25h');
+    process.exit();
 }
 
 var echo = function (msg, level) {
@@ -97,12 +98,14 @@ var respond = function (data) {
 // PEER QUERIES //////////////////////////
 
 // call peer
-var callPeer = function (msg) {
+var callPeer = function (msg, callback) {
     echo('call peer: '+ msg);
     var url = 'http://'+peerAddress+':'+port+'/'+msg;
     http.get(url, function(res_) {
+        if (callback) callback();
         res_.on('data', function (data) { parsePeerResponse(data) });
     }).on('error', function(e) {
+        if (callback) callback();
         if (e.code === 'ECONNREFUSED') {
             echo('peer isn\'t ready, wait for a call')
             echo('|');
@@ -145,7 +148,6 @@ var playNextVideo = function () {
     if (!filename) {
         console.log('vidcomm playback ended');
         exitFunction();
-        process.exit(0);
     } else {
         currFile++;
         playing = true;
@@ -229,7 +231,6 @@ var parseArgv = function () {
     // failsafe
     if (!conf && !files.length) {
         exitFunction();
-        process.exit(1);
     }
 }
 
@@ -240,7 +241,6 @@ var checkForDuplicates = function () {
             console.log('a video player is already running on this machine');
             console.log(stdout);
             exitFunction();
-            process.exit(1);
         } else {
             echo('no video player is running, vidcomm will start');
             parseArgv();
@@ -252,7 +252,6 @@ var checkForDuplicates = function () {
 process.on('SIGINT', function () {
     console.log(' ');
     exitFunction();
-    process.exit(1);
 });
 
 // START ///////////////////////////////////
@@ -264,7 +263,6 @@ require('child_process').exec('which omxplayer', function (error, stdout, stderr
             if (stdout[0] !== '/') {
                 console.log('no video player available');
                 exitFunction();
-                process.exit(1);
             } else {
                 player = 'mplayer';
                 echo('available video player: '+player);
