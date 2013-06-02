@@ -60,9 +60,9 @@ var startServer = function () {
             respond('no');
         }
     }).listen(port, localAddress);
-    echo('server running at http://'+localAddress+':'+port);
-    // query peer for status
-    queryPeer('playing');
+    echo('local server running at http://'+localAddress+':'+port);
+    // call peer for status
+    callPeer('playing');
 }
 
 // parse incoming http requests
@@ -70,19 +70,19 @@ var parseRequest = function () {
     var url = urlmod.parse(req.url);
     if (url.href) {
         var cmd = url.href.slice(1);
-        echo('network request: '+cmd);
+        echo('incoming network request: '+cmd);
         if (cmd === 'playing') respond(isPlaying());
         else if (cmd === 'ended') playNextVideo();
         else respond('bad command');
     } else {
-        echo('bad request url: '+url);
-        respond('error: bad request url');
+        echo('bad incoming network request: '+url);
+        respond('error: bad network request');
     }
 }
 
 // respond to peer http requests
 var respond = function (data) {
-    echo('network response: '+ data);
+    echo('outgoing network response: '+ data);
     var headers = {
         'Content-Length': Buffer.byteLength(data),
         'Content-Type': 'text/plain; charset=utf-8',
@@ -94,10 +94,10 @@ var respond = function (data) {
 
 // PEER QUERIES //////////////////////////
 
-// query peer
-var queryPeer = function (query) {
-    echo('query peer: '+ query);
-    var url = 'http://'+peerAddress+':'+port+'/'+query;
+// call peer
+var callPeer = function (msg) {
+    echo('call peer: '+ msg);
+    var url = 'http://'+peerAddress+':'+port+'/'+msg;
     http.get(url, function(res_) {
         res_.on('data', function (data) { parsePeerResponse(data) });
     }).on('error', function(e) {
@@ -107,7 +107,7 @@ var queryPeer = function (query) {
     });
 }
 
-// parse peer's response to query
+// parse peer's response to call
 var parsePeerResponse = function (data) {
     echo('peer response: '+ data);
     if (data == 'no') {
@@ -141,14 +141,15 @@ var playNextVideo = function () {
         process.exit(0);
     } else {
         playing = true;
-        echo('play video '+filename);
+        echo('play video: '+filename);
+        echo('...');
         vidProc = (player === 'omxplayer') ? spawn('omxplayer', ['-o', 'local', filename]) : spawn('mplayer', ['-vm', filename]);
         vidProc.stdout.on('data', function (data) { vidProcLog += data; });
         vidProc.stderr.on('data', function (data) { vidProcLog += data; });
         vidProc.on('exit', function (code) {
             playing = false;
             echo(player+' exited with code '+code);
-            queryPeer('ended');
+            callPeer('ended');
         });
     }
 }
