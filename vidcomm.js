@@ -24,8 +24,9 @@ var exitFunction = function (code) {
     console.log('\033[?12l\033[?25h');
 }
 
-var echo = function (msg) {
-    if (logLevel > 0) console.log(msg);
+var echo = function (msg, level) {
+    if (!level) level = 1;
+    if (level <= logLevel) console.log(msg);
 }
 
 // HTTP SERVER /////////////////////////////
@@ -150,7 +151,7 @@ var playNextVideo = function () {
         echo('play video: '+filename);
         echo('..');
         vidProc = (player === 'omxplayer') ? spawn('omxplayer', ['-o', 'local', filename]) : spawn('mplayer', ['-vm', filename]);
-        vidProc.stdout.on('data', function (data) { echo(data.toString()); });
+        vidProc.stdout.on('data', function (data) { echo(data.toString(), 2); });
         vidProc.stderr.on('data', function (data) { echo(data.toString()); });
         vidProc.on('exit', function (code) {
             echo(player+' exited with code '+code);
