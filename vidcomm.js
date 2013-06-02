@@ -157,6 +157,7 @@ var playNextVideo = function () {
             playing = false;
             echo(player+' exited with code '+code);
             callPeer('ended');
+            echo('|');
         });
     }
 }
