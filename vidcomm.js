@@ -72,19 +72,19 @@ var parseRequest = function () {
     var url = urlmod.parse(req.url);
     if (url.href) {
         var cmd = url.href.slice(1);
-        echo('incoming network request: '+cmd);
+        echo('peer call: '+cmd);
         if (cmd === 'playing') respond(isPlaying());
         else if (cmd === 'ended') playNextVideo();
         else respond('bad command');
     } else {
-        echo('bad incoming network request: '+url);
-        respond('error: bad network request');
+        echo('bad request: '+url);
+        respond('bad request');
     }
 }
 
 // respond to peer http requests
 var respond = function (data) {
-    echo('outgoing network response: '+ data);
+    echo('response to peer: '+ data);
     var headers = {
         'Content-Length': Buffer.byteLength(data),
         'Content-Type': 'text/plain; charset=utf-8',
