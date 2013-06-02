@@ -18,12 +18,13 @@ var localAddress = '',
 
 // standardized exit function
 var exitFunction = function (code) {
-    callPeer('ended');
-    console.log('exiting vidcomm');
-    if (code) console.log('exited with code '+code);
-    // show cursor
-    console.log('\033[?12l\033[?25h');
-    process.exit();
+    callPeer('ended', function () {
+        console.log('exiting vidcomm');
+        if (code) console.log('exited with code '+code);
+        // show cursor
+        console.log('\033[?12l\033[?25h');
+        process.exit();
+    });
 }
 
 var echo = function (msg, level) {
