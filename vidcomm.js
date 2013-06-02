@@ -105,7 +105,7 @@ var callPeer = function (msg) {
     }).on('error', function(e) {
         if (e.code === 'ECONNREFUSED') {
             echo('peer isn\'t ready, wait for a call')
-            echo('...');
+            echo('|');
         }
     });
 }
