@@ -198,7 +198,7 @@ var parseArgv = function () {
                 }
             });
         }
-        if (files.length) echo('conf video(s) file: '+JSON.stringify(files));
+        if (files.length) echo('conf video file(s): '+JSON.stringify(files));
         if (peerAddress) echo('conf peer ip: '+peerAddress);
     }
     
