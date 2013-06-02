@@ -10,7 +10,7 @@ var vidProc,
     currFile = 0,
     playing = false;
 var localAddress = '',
-    remoteAddress = '',
+    peerAddress = '',
     port = 3000,
     req,
     res;
@@ -34,14 +34,13 @@ var echo = function (msg) {
 
 // find local ip address
 var findLocalAddress = function () {
-    echo('find local address');
     require('child_process').exec('ifconfig eth0 | grep \'inet addr:\' | cut -d: -f2 | awk \'{ print $1}\'', function (error, stdout, stderr) {
         if (stdout.search(/192\.168\.1\.\d+/) !== -1) {
             localAddress = stdout;
-            echo(localAddress);
+            echo('local ip address is '+localAddress);
             startServer();
         } else {
-            echo('couldn\'t find local ip address. letting server down.');
+            echo('couldn\'t find local ip address, play in offline mode');
             playNextVideo();
         }
     });
@@ -49,12 +48,11 @@ var findLocalAddress = function () {
 
 // start local http server
 var startServer = function () {
-    echo('start server');
     http.createServer(function (req_, res_) {
         req = req_;
         res = res_;
         if (req.method === 'GET') {
-            req.on('close', function() { echo('connection closed'); });
+            req.on('close', function() { echo('connection remotely closed'); });
             req.on('data', function(data) { /* void */ });
             req.on('end', function() { parseRequest(); });
         } else {
@@ -63,29 +61,29 @@ var startServer = function () {
         }
     }).listen(port, localAddress);
     echo('server running at http://'+localAddress+':'+port);
-    // query remote server for status
-    queryRemote('playing');
+    // query peer for status
+    queryPeer('playing');
 }
 
 // parse incoming http requests
 var parseRequest = function () {
-    echo('parse request');
+    echo('network request is:');
     var url = urlmod.parse(req.url);
     if (url.href) {
         var cmd = url.href.slice(1);
-        echo(cmd);
+        echo('  '+cmd);
         if (cmd === 'playing') respond(isPlaying());
         else if (cmd === 'ended') playNextVideo();
         else respond('bad command');
     } else {
-        echo('bad url '+url);
-        respond('error: bad url');
+        echo('bad request url: '+url);
+        respond('error: bad request url');
     }
 }
 
-// respond to remote http requests
+// respond to peer http requests
 var respond = function (data) {
-    echo('respond '+ data);
+    echo('network response: '+ data);
     var headers = {
         'Content-Length': Buffer.byteLength(data),
         'Content-Type': 'text/plain; charset=utf-8',
@@ -95,31 +93,31 @@ var respond = function (data) {
     res.end(data);
 }
 
-// REMOTE QUERIES //////////////////////////
+// PEER QUERIES //////////////////////////
 
-// query remote server
-var queryRemote = function (query) {
-    echo('query remote '+ query);
-    var url = 'http://'+remoteAddress+':'+port+'/'+query;
+// query peer
+var queryPeer = function (query) {
+    echo('query peer '+ query);
+    var url = 'http://'+peerAddress+':'+port+'/'+query;
     http.get(url, function(res_) {
-        res_.on('data', function (data) { parseServerResponse(data) });
+        res_.on('data', function (data) { parsePeerResponse(data) });
     }).on('error', function(e) {
         if (e.code === 'ECONNREFUSED') {
-            echo('remote is not ready, wait for its call')
+            echo('peer is not ready, wait for its call')
         }
     });
 }
 
-// parse remote server's response to query
-var parseServerResponse = function (data) {
-    echo('parse server response '+ data);
+// parse peer's response to query
+var parsePeerResponse = function (data) {
+    echo('peer response: '+ data);
     if (data == 'no') {
-        // remote is not playing, play local file
-        echo('remote isn\'t playing, play');
+        // peer is not playing, play local file
+        echo('peer isn\'t playing, play');
         playNextVideo();
     } else {
-        echo('remote is playing, wait for its call');
-        // wait for remote message, so, do nothing
+        echo('peer is playing, wait for its call');
+        // wait for peer message, so, do nothing
     }
 }
 
@@ -151,7 +149,7 @@ var playNextVideo = function () {
         vidProc.on('exit', function (code) {
             playing = false;
             echo(player+' exited with code '+code);
-            queryRemote('ended');
+            queryPeer('ended');
         });
     }
 }
@@ -178,8 +176,8 @@ var parseArgv = function () {
                 // video filename case
                 files.push(val);
             } else if (val.search(/192\.168\.1\.\d+/) !== -1) {
-                // remote address case
-                remoteAddress = val;
+                // peer address case
+                peerAddress = val;
             }
         });
     }
@@ -193,8 +191,8 @@ var parseArgv = function () {
                     // video filename case
                     files.push(val);
                 } else if (val.search(/192\.168\.1\.\d+/) !== -1) {
-                    // remote address case
-                    remoteAddress = val;
+                    // peer address case
+                    peerAddress = val;
                 }
             });
         }
@@ -205,8 +203,8 @@ var parseArgv = function () {
         // clear terminal, move cursor to top left and hide it
         // console.log('\033[2J\033\033[H\033[?25l');
 
-        // if a remote server address was given
-        if (remoteAddress.length) {
+        // if a peer address was given
+        if (peerAddress.length) {
             findLocalAddress();
         } else {
             playNextVideo();
