@@ -41,6 +41,7 @@ var findLocalAddress = function () {
             startServer();
         } else {
             echo('couldn\'t find local ip address, play in offline mode');
+            echo('-');
             playNextVideo();
         }
     });
@@ -103,6 +104,7 @@ var callPeer = function (msg) {
     }).on('error', function(e) {
         if (e.code === 'ECONNREFUSED') {
             echo('peer isn\'t ready, wait for a call')
+            echo('...');
         }
     });
 }
@@ -116,6 +118,7 @@ var parsePeerResponse = function (data) {
         playNextVideo();
     } else {
         echo('peer is playing, wait for a call');
+        echo('...');
         // wait for peer message, so, do nothing
     }
 }
@@ -142,7 +145,6 @@ var playNextVideo = function () {
     } else {
         playing = true;
         echo('play video: '+filename);
-        echo('...');
         vidProc = (player === 'omxplayer') ? spawn('omxplayer', ['-o', 'local', filename]) : spawn('mplayer', ['-vm', filename]);
         vidProc.stdout.on('data', function (data) { vidProcLog += data; });
         vidProc.stderr.on('data', function (data) { vidProcLog += data; });
@@ -212,6 +214,7 @@ var parseArgv = function () {
         if (peerAddress.length) {
             findLocalAddress();
         } else {
+            echo('-');
             playNextVideo();
         }
     }
