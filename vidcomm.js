@@ -37,7 +37,7 @@ var findLocalAddress = function () {
     require('child_process').exec('ifconfig eth0 | grep \'inet addr:\' | cut -d: -f2 | awk \'{ print $1}\'', function (error, stdout, stderr) {
         if (stdout.search(/192\.168\.1\.\d+/) !== -1) {
             localAddress = stdout.trim();
-            echo('local ip address is '+localAddress);
+            echo('local ip address: '+localAddress);
             startServer();
         } else {
             echo('couldn\'t find local ip address, play in offline mode');
@@ -102,7 +102,7 @@ var queryPeer = function (query) {
         res_.on('data', function (data) { parsePeerResponse(data) });
     }).on('error', function(e) {
         if (e.code === 'ECONNREFUSED') {
-            echo('peer is not ready, wait for its call')
+            echo('peer isn\'t ready, wait for a call')
         }
     });
 }
@@ -115,7 +115,7 @@ var parsePeerResponse = function (data) {
         echo('peer isn\'t playing, play');
         playNextVideo();
     } else {
-        echo('peer is playing, wait for its call');
+        echo('peer is playing, wait for a call');
         // wait for peer message, so, do nothing
     }
 }
@@ -256,7 +256,7 @@ require('child_process').exec('which omxplayer', function (error, stdout, stderr
                 process.exit(1);
             } else {
                 player = 'mplayer';
-                echo('available video player is '+player);
+                echo('available video player: '+player);
                 checkForDuplicates();
             }
         });
