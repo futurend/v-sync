@@ -103,13 +103,19 @@ var callPeer = function (msg, callback) {
     echo('call peer: '+ msg);
     var url = 'http://'+peerAddress+':'+port+'/'+msg;
     http.get(url, function(res_) {
-        if (callback) callback();
-        res_.on('data', function (data) { parsePeerResponse(data) });
+        if (callback) {
+            callback();
+        } else {
+            res_.on('data', function (data) { parsePeerResponse(data) });
+        }
     }).on('error', function(e) {
-        if (callback) callback();
-        if (e.code === 'ECONNREFUSED') {
-            echo('peer isn\'t ready, wait for a call')
-            echo('|');
+        if (callback) {
+            callback();
+        } else {
+            if (e.code === 'ECONNREFUSED') {
+                echo('peer isn\'t ready, wait for a call')
+                echo('|');
+            }
         }
     });
 }
