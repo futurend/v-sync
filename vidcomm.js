@@ -104,7 +104,9 @@ var queryRemote = function (query) {
     http.get(url, function(res_) {
         res_.on('data', function (data) { parseServerResponse(data) });
     }).on('error', function(e) {
-        echo(e.code === 'ECONNREFUSED');
+        if (e.code === 'ECONNREFUSED') {
+            echo('remote is not ready, wait for its call')
+        }
     });
 }
 
@@ -113,10 +115,10 @@ var parseServerResponse = function (data) {
     echo('parse server response '+ data);
     if (data == 'no') {
         // remote is not playing, play local file
-        echo('remote is not playing, play local file');
+        echo('remote isn\'t playing, play');
         playNextVideo();
     } else {
-        echo('remote is playing, wait for remote message, so, do nothing');
+        echo('remote is playing, wait for its call');
         // wait for remote message, so, do nothing
     }
 }
