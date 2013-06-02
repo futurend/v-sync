@@ -220,15 +220,14 @@ var parseArgv = function () {
 
 // check whether other vidcomm process is running on the system
 var checkForDuplicates = function () {
-    echo('check for duplicates');
     require('child_process').exec('ps aux | grep '+player+' | grep -v grep', function (error, stdout, stderr) {
         if (stdout.length) {
-            console.log('a video player is already running on this machine.');
+            console.log('a video player is already running on this machine');
             console.log(stdout);
             exitFunction();
             process.exit(1);
         } else {
-            echo('vidcomm starting.');
+            echo('no video player is running, vidcomm will start');
             parseArgv();
         }
     });
@@ -248,18 +247,18 @@ require('child_process').exec('which omxplayer', function (error, stdout, stderr
     if (stdout[0] !== '/') {
         require('child_process').exec('which mplayer', function (error, stdout, stderr) {
             if (stdout[0] !== '/') {
-                console.log('no video player available.');
+                console.log('no video player available');
                 exitFunction();
                 process.exit(1);
             } else {
                 player = 'mplayer';
-                echo('player is '+player);
+                echo('available video player is '+player);
                 checkForDuplicates();
             }
         });
     } else {
         player = 'omxplayer';
-        echo('player is '+player);
+        echo('available video player is '+player);
         checkForDuplicates();
     }
 });
