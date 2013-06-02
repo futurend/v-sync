@@ -262,7 +262,7 @@ require('child_process').exec('which omxplayer', function (error, stdout, stderr
         });
     } else {
         player = 'omxplayer';
-        echo('available video player is '+player);
+        echo('available video player: '+player);
         checkForDuplicates();
     }
 });
