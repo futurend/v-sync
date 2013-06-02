@@ -158,7 +158,6 @@ var playNextVideo = function () {
 
 // parse process' incoming arguments
 var parseArgv = function () {
-    echo('parse argv');
     var conf;
     files = [];
 
@@ -166,6 +165,7 @@ var parseArgv = function () {
     if (process.argv.length < 3) {
         // no arguments case
         conf = 'vidcomm.conf';
+        echo('no input arguments, will play from '+conf);
     } else {
         process.argv.forEach(function (val, idx, arr) {
             if (val.search(/^\.*[^\.]+\.conf$/) !== -1) {
@@ -180,6 +180,9 @@ var parseArgv = function () {
                 peerAddress = val;
             }
         });
+        if (conf) echo('input conf file: '+conf);
+        if (files.length) echo('input video file: '+JSON.stringify(files));
+        if (peerAddress) echo('input peer ip: '+peerAddress);
     }
 
     // if a configuration file was given
@@ -196,6 +199,8 @@ var parseArgv = function () {
                 }
             });
         }
+        if (files.length) echo('conf video file: '+JSON.stringify(files));
+        if (peerAddress) echo('conf peer ip: '+peerAddress);
     }
     
     // if video files were given
