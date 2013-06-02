@@ -119,7 +119,7 @@ var parsePeerResponse = function (data) {
         playNextVideo();
     } else {
         echo('peer is playing, wait for a call');
-        echo('...');
+        echo('|');
         // wait for peer message, so, do nothing
     }
 }
@@ -137,7 +137,10 @@ var playNextVideo = function () {
     // next file to play
     var filename = files[currFile++];
     // if it doesn't exist, reset filename to the first one
-    if (!filename) filename = files[0];
+    if (!filename) {
+        currFile = 0;
+        filename = files[0];
+    }
     // play only if the file exists
     if (!filename) {
         console.log('vidcomm playback ended');
@@ -146,6 +149,7 @@ var playNextVideo = function () {
     } else {
         playing = true;
         echo('play video: '+filename);
+        echo('..');
         vidProc = (player === 'omxplayer') ? spawn('omxplayer', ['-o', 'local', filename]) : spawn('mplayer', ['-vm', filename]);
         vidProc.stdout.on('data', function (data) { vidProcLog += data; });
         vidProc.stderr.on('data', function (data) { vidProcLog += data; });
