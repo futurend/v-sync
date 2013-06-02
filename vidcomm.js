@@ -27,7 +27,7 @@ var exitFunction = function (code) {
 }
 
 var echo = function (msg) {
-    if (logLevel) console.log(msg);
+    if (logLevel > 0) console.log(msg);
 }
 
 // HTTP SERVER /////////////////////////////
@@ -54,7 +54,7 @@ var startServer = function () {
         req = req_;
         res = res_;
         if (req.method === 'GET') {
-            req.on('close', function() { echo('error: connection closed'); });
+            req.on('close', function() { echo('connection closed'); });
             req.on('data', function(data) { /* void */ });
             req.on('end', function() { parseRequest(); });
         } else {
@@ -104,7 +104,7 @@ var queryRemote = function (query) {
     http.get(url, function(res_) {
         res_.on('data', function (data) { parseServerResponse(data) });
     }).on('error', function(e) {
-        echo("got error: " + e.message);
+        echo(e);
     });
 }
 
