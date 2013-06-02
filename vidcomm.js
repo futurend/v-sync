@@ -2,7 +2,7 @@ var spawn = require('child_process').spawn,
     http = require('http'),
     urlmod = require('url'),
     fs = require('fs');
-var logLevel = 0;
+var logLevel = 1;
 var vidProc,
     player,
     vidProcLog = '',
