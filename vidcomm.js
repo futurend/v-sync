@@ -67,11 +67,10 @@ var startServer = function () {
 
 // parse incoming http requests
 var parseRequest = function () {
-    echo('network request is:');
     var url = urlmod.parse(req.url);
     if (url.href) {
         var cmd = url.href.slice(1);
-        echo('  '+cmd);
+        echo('network request: '+cmd);
         if (cmd === 'playing') respond(isPlaying());
         else if (cmd === 'ended') playNextVideo();
         else respond('bad command');
@@ -97,7 +96,7 @@ var respond = function (data) {
 
 // query peer
 var queryPeer = function (query) {
-    echo('query peer '+ query);
+    echo('query peer: '+ query);
     var url = 'http://'+peerAddress+':'+port+'/'+query;
     http.get(url, function(res_) {
         res_.on('data', function (data) { parsePeerResponse(data) });
@@ -165,7 +164,7 @@ var parseArgv = function () {
     if (process.argv.length < 3) {
         // no arguments case
         conf = 'vidcomm.conf';
-        echo('no input arguments, will play from '+conf);
+        echo('no input arguments, will play from: '+conf);
     } else {
         process.argv.forEach(function (val, idx, arr) {
             if (val.search(/^\.*[^\.]+\.conf$/) !== -1) {
@@ -180,8 +179,8 @@ var parseArgv = function () {
                 peerAddress = val;
             }
         });
-        if (conf) echo('input conf file: '+conf);
-        if (files.length) echo('input video file: '+JSON.stringify(files));
+        if (conf) echo('input conf file(s): '+conf);
+        if (files.length) echo('input video file(s): '+JSON.stringify(files));
         if (peerAddress) echo('input peer ip: '+peerAddress);
     }
 
@@ -199,7 +198,7 @@ var parseArgv = function () {
                 }
             });
         }
-        if (files.length) echo('conf video file: '+JSON.stringify(files));
+        if (files.length) echo('conf video(s) file: '+JSON.stringify(files));
         if (peerAddress) echo('conf peer ip: '+peerAddress);
     }
     
