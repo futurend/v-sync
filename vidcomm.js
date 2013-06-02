@@ -18,6 +18,7 @@ var localAddress = '',
 
 // standardized exit function
 var exitFunction = function (code) {
+    callPeer('ended');
     console.log('exiting vidcomm');
     if (code) console.log('exited with code '+code);
     // show cursor
