@@ -104,7 +104,7 @@ var queryRemote = function (query) {
     http.get(url, function(res_) {
         res_.on('data', function (data) { parseServerResponse(data) });
     }).on('error', function(e) {
-        echo(e.code);
+        echo(e.code === 'ECONNREFUSED');
     });
 }
 
