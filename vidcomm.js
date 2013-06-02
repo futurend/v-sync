@@ -62,6 +62,7 @@ var startServer = function () {
         }
     }).listen(port, localAddress);
     echo('local server running at http://'+localAddress+':'+port);
+    echo('-');
     // call peer for status
     callPeer('playing');
 }
