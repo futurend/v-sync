@@ -18,13 +18,11 @@ var localAddress = '',
 
 // standardized exit function
 var exitFunction = function (code) {
-    callPeer('ended', function () {
-        console.log('exiting vidcomm');
-        if (code) console.log('exited with code '+code);
-        // show cursor
-        console.log('\033[?12l\033[?25h');
-        process.exit();
-    });
+    console.log('exiting vidcomm');
+    if (code) console.log('exited with code '+code);
+    // show cursor
+    console.log('\033[?12l\033[?25h');
+    process.exit();
 }
 
 var echo = function (msg, level) {
@@ -99,23 +97,15 @@ var respond = function (data) {
 // PEER QUERIES //////////////////////////
 
 // call peer
-var callPeer = function (msg, callback) {
+var callPeer = function (msg) {
     echo('call peer: '+ msg);
     var url = 'http://'+peerAddress+':'+port+'/'+msg;
     http.get(url, function(res_) {
-        if (callback) {
-            callback();
-        } else {
-            res_.on('data', function (data) { parsePeerResponse(data) });
-        }
+        res_.on('data', function (data) { parsePeerResponse(data) });
     }).on('error', function(e) {
-        if (callback) {
-            callback();
-        } else {
-            if (e.code === 'ECONNREFUSED') {
-                echo('peer isn\'t ready, wait for a call')
-                echo('|');
-            }
+        if (e.code === 'ECONNREFUSED') {
+            echo('peer isn\'t ready, wait for a call')
+            echo('|');
         }
     });
 }
