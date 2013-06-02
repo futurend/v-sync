@@ -135,18 +135,19 @@ var isPlaying = function () {
 // play video files
 var playNextVideo = function () {
     // next file to play
-    var filename = files[++currFile];
-    // if it doesn't exist, reset filename to the first one
+    var filename = files[currFile];
+    // if the next file doesn't exist, reset filename
     if (!filename) {
         currFile = 0;
         filename = files[0];
     }
-    // play only if the file exists
+    // play only if the file really exists
     if (!filename) {
         console.log('vidcomm playback ended');
         exitFunction();
         process.exit(0);
     } else {
+        currFile++;
         playing = true;
         echo('play video: '+filename);
         echo('..');
@@ -154,8 +155,8 @@ var playNextVideo = function () {
         vidProc.stdout.on('data', function (data) { vidProcLog += data; });
         vidProc.stderr.on('data', function (data) { vidProcLog += data; });
         vidProc.on('exit', function (code) {
-            playing = false;
             echo(player+' exited with code '+code);
+            playing = false;
             callPeer('ended');
             echo('|');
         });
