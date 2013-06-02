@@ -5,7 +5,6 @@ var spawn = require('child_process').spawn,
 var logLevel = 1;
 var vidProc,
     player,
-    vidProcLog = '',
     files = [],
     currFile = 0,
     playing = false;
@@ -21,7 +20,6 @@ var localAddress = '',
 var exitFunction = function (code) {
     console.log('exiting vidcomm');
     if (code) console.log('exited with code '+code);
-    if (logLevel > 1 && vidProcLog.length) console.log(vidProcLog);
     // show cursor
     console.log('\033[?12l\033[?25h');
 }
@@ -152,8 +150,8 @@ var playNextVideo = function () {
         echo('play video: '+filename);
         echo('..');
         vidProc = (player === 'omxplayer') ? spawn('omxplayer', ['-o', 'local', filename]) : spawn('mplayer', ['-vm', filename]);
-        vidProc.stdout.on('data', function (data) { if (logLevel > 1) vidProcLog += data; });
-        vidProc.stderr.on('data', function (data) { if (logLevel > 1) vidProcLog += data; });
+        vidProc.stdout.on('data', function (data) { if (logLevel > 1) echo(data); });
+        vidProc.stderr.on('data', function (data) { if (logLevel > 0) echo(data); });
         vidProc.on('exit', function (code) {
             echo(player+' exited with code '+code);
             playing = false;
