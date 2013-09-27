@@ -1,4 +1,4 @@
 sync-pi
 =======
 
-Node.js networked video projection synch mechanism
+node video playback sync for raspberry pi
