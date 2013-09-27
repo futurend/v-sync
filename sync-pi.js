@@ -18,7 +18,7 @@ var localAddress = '',
 
 // standardized exit function
 var exitFunction = function (code) {
-    console.log('exiting vidcomm');
+    console.log('exiting sync-pi');
     if (code) console.log('exited with code '+code);
     // show cursor
     console.log('\033[?12l\033[?25h');
@@ -142,7 +142,7 @@ var playNextVideo = function () {
     }
     // play only if the file really exists
     if (!filename) {
-        console.log('vidcomm playback ended');
+        console.log('sync-pi playback ended');
         exitFunction();
     } else {
         currFile++;
@@ -171,7 +171,7 @@ var parseArgv = function () {
     // parse arguments
     if (process.argv.length < 3) {
         // no arguments case
-        conf = 'vidcomm.conf';
+        conf = 'sync-pi.conf';
         echo('no input arguments, will play from: '+conf);
     } else {
         process.argv.forEach(function (val, idx, arr) {
@@ -230,7 +230,7 @@ var parseArgv = function () {
     }
 }
 
-// check whether other vidcomm process is running on the system
+// check whether other sync-pi process is running on the system
 var checkForDuplicates = function () {
     require('child_process').exec('ps aux | grep '+player+' | grep -v grep', function (error, stdout, stderr) {
         if (stdout.length) {
@@ -238,7 +238,7 @@ var checkForDuplicates = function () {
             console.log(stdout);
             exitFunction();
         } else {
-            echo('no video player is running, vidcomm will start');
+            echo('no video player is running, sync-pi will start');
             parseArgv();
         }
     });
