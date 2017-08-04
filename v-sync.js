@@ -37,33 +37,42 @@ var echo = function (msg) {
 
 // find local ip address
 var findLocalAddress = function () {
+  var ip_re = /(?!127)\d{3}\.(?!0)\d{1,3}\.(?!0)\d{1,3}\.\d{1,3}/;
     require('child_process').exec('ifconfig eth0 | grep \'inet addr:\' | cut -d: -f2 | awk \'{ print $1}\'', function (error, stdout, stderr) {
-        if (stdout.search(/192\.168\.1\.\d+/) !== -1) {
+        if (stdout.search(ip_re) !== -1) {
             localAddress = stdout.trim();
             echo('local ip address: '+localAddress);
             startServer();
         } else {
           require('child_process').exec('ifconfig wlan0 | grep \'inet\' | cut -d: -f2 | awk \'{ print $2}\'', function (error, stdout, stderr) {
-              if (stdout.search(/192\.168\.1\.\d+/) !== -1) {
+              if (stdout.search(ip_re) !== -1) {
                   localAddress = stdout.trim();
                   echo('local ip address: '+localAddress);
                   startServer();
               } else {
                 require('child_process').exec('ifconfig en0 | grep \'inet\' | cut -d: -f2 | awk \'{ print $2}\'', function (error, stdout, stderr) {
-                    if (stdout.search(/192\.168\.1\.\d+/) !== -1) {
+                    if (stdout.search(ip_re) !== -1) {
                         localAddress = stdout.trim();
                         echo('local ip address: '+localAddress);
                         startServer();
                     } else {
                       require('child_process').exec('ifconfig en1 | grep \'inet\' | cut -d: -f2 | awk \'{ print $2}\'', function (error, stdout, stderr) {
-                          if (stdout.search(/192\.168\.1\.\d+/) !== -1) {
+                          if (stdout.search(ip_re) !== -1) {
                               localAddress = stdout.trim();
                               echo('local ip address: '+localAddress);
                               startServer();
                           } else {
-                              echo('couldn\'t find local ip address, play in offline mode');
-                              echo('.-.');
-                              playNextVideo();
+                            require('child_process').exec('ip addr show | grep \'inet\' | cut -d: -f2 | awk \'{ print $2}\'', function (error, stdout, stderr) {
+                                if (stdout.search(ip_re) !== -1) {
+                                    localAddress = stdout.trim();
+                                    echo('local ip address: '+localAddress);
+                                    startServer();
+                                } else {
+                                    echo('couldn\'t find local ip address, play in offline mode');
+                                    echo('.-.');
+                                    playNextVideo();
+                                }
+                            });
                           }
                       });
                     }
