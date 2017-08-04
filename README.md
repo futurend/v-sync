@@ -1,4 +1,6 @@
-sync-pi
+v-sync
 =======
 
-node video playback sync for raspberry pi
+Network video playback synchronization for Linux and OSX.
+
+

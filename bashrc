@@ -14,6 +14,6 @@ else
     clear
 
     # autorun vidcomm
-    cd ~/vidcomm
-    node vidcomm.js
+    cd ~/v-sync
+    node v-sync.js
 fi
