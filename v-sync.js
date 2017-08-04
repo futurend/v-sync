@@ -2,7 +2,6 @@ var spawn = require('child_process').spawn,
     http = require('http'),
     urlmod = require('url'),
     fs = require('fs');
-var logLevel = 0;
 var vidProc,
     player,
     files = [],
@@ -16,6 +15,8 @@ var localAddress = '',
 
 // INIT ////////////////////////////////////
 
+var logLevel = 2;
+
 // standardized exit function
 var exitFunction = function (code) {
     console.log('exiting sync-pi');
@@ -25,8 +26,11 @@ var exitFunction = function (code) {
     process.exit();
 }
 
-var echo = function (msg) {
+var warn = function (msg) {
     if (logLevel > 0) console.log(msg);
+}
+var echo = function (msg) {
+    if (logLevel > 1) console.log(msg);
 }
 
 // HTTP SERVER /////////////////////////////
@@ -39,9 +43,33 @@ var findLocalAddress = function () {
             echo('local ip address: '+localAddress);
             startServer();
         } else {
-            echo('couldn\'t find local ip address, play in offline mode');
-            echo('-');
-            playNextVideo();
+          require('child_process').exec('ifconfig wlan0 | grep \'inet\' | cut -d: -f2 | awk \'{ print $2}\'', function (error, stdout, stderr) {
+              if (stdout.search(/192\.168\.1\.\d+/) !== -1) {
+                  localAddress = stdout.trim();
+                  echo('local ip address: '+localAddress);
+                  startServer();
+              } else {
+                require('child_process').exec('ifconfig en0 | grep \'inet\' | cut -d: -f2 | awk \'{ print $2}\'', function (error, stdout, stderr) {
+                    if (stdout.search(/192\.168\.1\.\d+/) !== -1) {
+                        localAddress = stdout.trim();
+                        echo('local ip address: '+localAddress);
+                        startServer();
+                    } else {
+                      require('child_process').exec('ifconfig en1 | grep \'inet\' | cut -d: -f2 | awk \'{ print $2}\'', function (error, stdout, stderr) {
+                          if (stdout.search(/192\.168\.1\.\d+/) !== -1) {
+                              localAddress = stdout.trim();
+                              echo('local ip address: '+localAddress);
+                              startServer();
+                          } else {
+                              echo('couldn\'t find local ip address, play in offline mode');
+                              echo('-');
+                              playNextVideo();
+                          }
+                      });
+                    }
+                });
+              }
+          });
         }
     });
 }
@@ -142,14 +170,33 @@ var playNextVideo = function () {
     }
     // play only if the file really exists
     if (!filename) {
-        console.log('sync-pi playback ended');
+        echo('sync-pi playback ended');
         exitFunction();
     } else {
         currFile++;
         playing = true;
         echo('play video: '+filename);
         echo('..');
-        vidProc = (player === 'omxplayer') ? spawn('omxplayer', ['-o', 'local', filename]) : spawn('mplayer', ['-vm', filename]);
+        // vidProc = (player === 'omxplayer') ? spawn('omxplayer', ['-o', 'local', filename]) : spawn('mplayer', ['-vm', filename]);
+        switch (player) {
+          case 'omxplayer':
+            vidProc =  spawn(player, ['-o', 'local', filename]);
+            break;
+          case 'mplayer':
+            vidProc = spawn(player, ['-vm', filename]);
+            break;
+          case 'vlc':
+            vidProc = spawn(player, ['-f --play-and-pause', filename]);
+            break;
+          case '/Applications/VLC.app/Contents/MacOS/VLC':
+            vidProc = spawn(player, ['-f --play-and-pause', filename]);
+            break;
+          case '~/Applications/VLC.app/Contents/MacOS/VLC':
+            vidProc = spawn(player, ['-f --play-and-pause', filename]);
+            break;
+          default:
+            vidProc = '';
+        }
         vidProc.stdout.on('data', function (data) { echo(data.toString()); });
         vidProc.stderr.on('data', function (data) { echo(data.toString()); });
         vidProc.on('exit', function (code) {
@@ -182,7 +229,7 @@ var parseArgv = function () {
             } else if (val.search(/^\.*[^\.]+\.(mp4|m4v|mov)$/) !== -1) {
                 // video filename case
                 files.push(val);
-            } else if (val.search(/192\.168\.1\.\d+/) !== -1) {
+            } else if (val.search(/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/) !== -1) {
                 // peer address case
                 peerAddress = val;
             }
@@ -200,20 +247,22 @@ var parseArgv = function () {
                 if (val.search(/^\.*[^\.]+\.(mp4|m4v|mov)$/) !== -1) {
                     // video filename case
                     files.push(val);
-                } else if (val.search(/192\.168\.1\.\d+/) !== -1) {
+                    echo('will play: '+val);
+                } else if (val.search(/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/) !== -1) {
                     // peer address case
                     peerAddress = val;
+                    echo('will connect to: '+val);
                 }
             });
         }
         if (files.length) echo('conf video file(s): '+JSON.stringify(files));
         if (peerAddress) echo('conf peer ip: '+peerAddress);
     }
-    
+
     // if video files were given
     if (files.length) {
         // clear terminal, move cursor to top left and hide it
-        // console.log('\033[2J\033\033[H\033[?25l');
+        // echo('\033[2J\033\033[H\033[?25l');
 
         // if a peer address was given
         if (peerAddress.length) {
@@ -234,8 +283,8 @@ var parseArgv = function () {
 var checkForDuplicates = function () {
     require('child_process').exec('ps aux | grep '+player+' | grep -v grep', function (error, stdout, stderr) {
         if (stdout.length) {
-            console.log('a video player is already running on this machine');
-            console.log(stdout);
+            warn('a video player is already running on this machine');
+            warn(stdout);
             exitFunction();
         } else {
             echo('no video player is running, sync-pi will start');
@@ -257,8 +306,32 @@ require('child_process').exec('which omxplayer', function (error, stdout, stderr
     if (stdout[0] !== '/') {
         require('child_process').exec('which mplayer', function (error, stdout, stderr) {
             if (stdout[0] !== '/') {
-                console.log('no video player available');
-                exitFunction();
+              require('child_process').exec('which vlc', function (error, stdout, stderr) {
+                  if (stdout[0] !== '/') {
+                    require('child_process').exec('which /Applications/VLC.app/Contents/MacOS/VLC', function (error, stdout, stderr) {
+                        if (stdout[0] !== '/') {
+                          require('child_process').exec('which ~/Applications/VLC.app/Contents/MacOS/VLC', function (error, stdout, stderr) {
+                              if (stdout[0] !== '/') {
+                                  warn('no video player available');
+                                  exitFunction();
+                              } else {
+                                  player = '~/Applications/VLC.app/Contents/MacOS/VLC';
+                                  echo('available video player: '+player);
+                                  checkForDuplicates();
+                              }
+                          });
+                        } else {
+                            player = '/Applications/VLC.app/Contents/MacOS/VLC';
+                            echo('available video player: '+player);
+                            checkForDuplicates();
+                        }
+                    });
+                  } else {
+                      player = 'vlc';
+                      echo('available video player: '+player);
+                      checkForDuplicates();
+                  }
+              });
             } else {
                 player = 'mplayer';
                 echo('available video player: '+player);
