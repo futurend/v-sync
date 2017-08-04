@@ -191,19 +191,19 @@ var playNextVideo = function () {
         // vidProc = (player === 'omxplayer') ? spawn('omxplayer', ['-o', 'local', filename]) : spawn('mplayer', ['-vm', filename]);
         switch (player) {
           case 'omxplayer':
-            vidProc =  spawn(player, ['-o', 'local', filename]);
+            vidProc =  spawn(player, ['-o', 'local', filename], { stdio: 'silent' });
             break;
           case 'mplayer':
-            vidProc = spawn(player, ['-vm', filename]);
+            vidProc = spawn(player, ['-vm', '-fs', filename], { stdio: 'silent' });
             break;
           case 'vlc':
-            vidProc = spawn(player, ['-f', '--play-and-exit', filename]);
+            vidProc = spawn(player, ['-f', '--play-and-exit', filename], { stdio: 'silent' });
             break;
           case '/Applications/VLC.app/Contents/MacOS/VLC':
-            vidProc = spawn(player, ['-f', '--play-and-exit', filename]);
+            vidProc = spawn(player, ['-f', '--play-and-exit', filename], { stdio: 'silent' });
             break;
           case '~/Applications/VLC.app/Contents/MacOS/VLC':
-            vidProc = spawn(player, ['-f', '--play-and-exit', filename]);
+            vidProc = spawn(player, ['-f', '--play-and-exit', filename], { stdio: 'silent' });
             break;
           default:
             vidProc = '';
