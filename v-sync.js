@@ -62,7 +62,7 @@ var findLocalAddress = function () {
                               startServer();
                           } else {
                               echo('couldn\'t find local ip address, play in offline mode');
-                              echo('-');
+                              echo('.-.');
                               playNextVideo();
                           }
                       });
@@ -89,7 +89,7 @@ var startServer = function () {
         }
     }).listen(port, localAddress);
     echo('local server running at http://'+localAddress+':'+port);
-    echo('-');
+    echo(',-´');
     // call peer for status
     callPeer('playing');
 }
@@ -173,6 +173,7 @@ var playNextVideo = function () {
         echo('playback ended');
         exitFunction();
     } else {
+      if (fs.existsSync(filename)) {
         currFile++;
         playing = true;
         echo('play video: '+filename);
@@ -205,6 +206,10 @@ var playNextVideo = function () {
             callPeer('ended');
             echo('|');
         });
+      } else {
+        warn(filename+' doesn´t exist');
+        exitFunction();
+      }
     }
 }
 
@@ -249,6 +254,7 @@ var parseArgv = function () {
           exitFunction();
           return;
         }
+
         if (data.length) {
             data.split('\n').forEach(function (val, idx, arr) {
                 if (val.search(/^\.*[^\.]+\.(mp4|m4v|mov)$/) !== -1) {
@@ -275,9 +281,12 @@ var parseArgv = function () {
         if (peerAddress.length) {
             findLocalAddress();
         } else {
-            echo('-');
+            echo('-.-');
             playNextVideo();
         }
+    } else {
+      exitFunction();
+      return;
     }
 
     // failsafe
@@ -290,7 +299,7 @@ var parseArgv = function () {
 var checkForDuplicates = function () {
     require('child_process').exec('ps aux | grep '+player+' | grep -v grep', function (error, stdout, stderr) {
         if (stdout.length) {
-            warn('a video player is already running on this machine');
+            warn('another video player is already running on this machine');
             warn(stdout);
             exitFunction();
         } else {
