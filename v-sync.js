@@ -176,10 +176,11 @@ var playNextVideo = function () {
     if (!filename) {
         currFile = 0;
         filename = files[0];
+        warn('filename reset to: '+filename);
     }
     // play only if the file really exists
     if (!filename) {
-        echo('playback ended');
+        warn('filename is not valid: '+filename);
         exitFunction();
     } else {
       if (fs.existsSync(filename)) {
