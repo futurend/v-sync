@@ -196,13 +196,13 @@ var playNextVideo = function () {
             vidProc = spawn(player, ['-vm', filename]);
             break;
           case 'vlc':
-            vidProc = spawn(player, ['-f --play-and-pause', filename]);
+            vidProc = spawn(player, ['-f', '--play-and-exit', filename]);
             break;
           case '/Applications/VLC.app/Contents/MacOS/VLC':
-            vidProc = spawn(player, ['-f --play-and-pause', filename]);
+            vidProc = spawn(player, ['-f', '--play-and-exit', filename]);
             break;
           case '~/Applications/VLC.app/Contents/MacOS/VLC':
-            vidProc = spawn(player, ['-f --play-and-pause', filename]);
+            vidProc = spawn(player, ['-f', '--play-and-exit', filename]);
             break;
           default:
             vidProc = '';
