@@ -19,7 +19,7 @@ var logLevel = 2;
 
 // standardized exit function
 var exitFunction = function (code) {
-    console.log('exiting sync-pi');
+    console.log('exiting');
     if (code) console.log('exited with code '+code);
     // show cursor
     console.log('\033[?12l\033[?25h');
@@ -170,7 +170,7 @@ var playNextVideo = function () {
     }
     // play only if the file really exists
     if (!filename) {
-        echo('sync-pi playback ended');
+        echo('playback ended');
         exitFunction();
     } else {
         currFile++;
@@ -218,7 +218,7 @@ var parseArgv = function () {
     // parse arguments
     if (process.argv.length < 3) {
         // no arguments case
-        conf = 'sync-pi.conf';
+        conf = 'v-sync.conf';
         echo('no input arguments, will play from: '+conf);
     } else {
         process.argv.forEach(function (val, idx, arr) {
@@ -241,7 +241,14 @@ var parseArgv = function () {
 
     // if a configuration file was given
     if (conf) {
-        var data = fs.readFileSync(conf, {encoding:'utf-8'});
+        var data;
+        try {
+          data = fs.readFileSync(conf, {encoding:'utf-8'});
+        } catch (e) {
+          warn('couldn´t load '+ conf);
+          exitFunction();
+          return;
+        }
         if (data.length) {
             data.split('\n').forEach(function (val, idx, arr) {
                 if (val.search(/^\.*[^\.]+\.(mp4|m4v|mov)$/) !== -1) {
@@ -279,7 +286,7 @@ var parseArgv = function () {
     }
 }
 
-// check whether other sync-pi process is running on the system
+// check whether other v-sync process is running on the system
 var checkForDuplicates = function () {
     require('child_process').exec('ps aux | grep '+player+' | grep -v grep', function (error, stdout, stderr) {
         if (stdout.length) {
@@ -287,7 +294,7 @@ var checkForDuplicates = function () {
             warn(stdout);
             exitFunction();
         } else {
-            echo('no video player is running, sync-pi will start');
+            echo('no other video player is running, v-sync will start');
             parseArgv();
         }
     });
