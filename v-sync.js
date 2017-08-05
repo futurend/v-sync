@@ -37,7 +37,7 @@ var echo = function (msg) {
 
 // find local ip address
 var findLocalAddress = function () {
-  var ip_re = /(?!127)\d{1,3}\.(?!0)\d{1,3}\.(?!0)\d{1,3}\.\d{1,3}/;
+  var ip_re = /(?!127)(\d{1,3}\.(?!0)\d{1,3}\.(?!0)\d{1,3}\.\d{1,3})/;
     require('child_process').exec('ifconfig eth0 | grep \'inet addr:\' | cut -d: -f2 | awk \'{ print $1}\'', function (error, stdout, stderr) {
         if (stdout.search(ip_re) !== -1) {
             localAddress = stdout.trim();
