@@ -207,10 +207,10 @@ var playNextVideo = function () {
             vidProc = spawn(player, ['-f', '--play-and-exit', filename], { stdio: 'ignore' });
             break;
           case '/Applications/VLC.app/Contents/MacOS/VLC':
-            vidProc = spawn(player, ['-f', '--play-and-exit', '--video-on-top', '--mouse-hide-timeout 0', filename], { stdio: 'ignore' });
+            vidProc = spawn(player, ['-f', '--play-and-exit', '--video-on-top', '--mouse-hide-timeout', '0', filename], { stdio: 'ignore' });
             break;
           case '~/Applications/VLC.app/Contents/MacOS/VLC':
-            vidProc = spawn(player, ['-f', '--play-and-exit', '--video-on-top', '--mouse-hide-timeout 0', filename], { stdio: 'ignore' });
+            vidProc = spawn(player, ['-f', '--play-and-exit', '--video-on-top', '--mouse-hide-timeout ', '0', filename], { stdio: 'ignore' });
             break;
           default:
             vidProc = '';
