@@ -26,55 +26,60 @@ var exitFunction = function (code) {
     process.exit();
 }
 
-var warn = function (msg) {
-    if (logLevel > 0) console.log(msg);
+var warn = function (msg,msg2) {
+    if (logLevel > 0) console.log(msg, (msg2||''));
 }
-var echo = function (msg) {
-    if (logLevel > 1) console.log(msg);
+var echo = function (msg,msg2) {
+    if (logLevel > 1) console.log(msg, (msg2||''));
 }
 
 // HTTP SERVER /////////////////////////////
 
 // find local ip address
 var findLocalAddress = function () {
-  var ip_re = /(?!127)(\d{1,3}\.(?!0)\d{1,3}\.(?!0)\d{1,3}\.\d{1,3})/;
+  var ip_re = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/gm;
+  var lo_re = /(?!127)\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/gm;
     require('child_process').exec('ifconfig eth0 | grep \'inet addr:\' | cut -d: -f2 | awk \'{ print $1}\'', function (error, stdout, stderr) {
         if (stdout.search(ip_re) !== -1) {
-          warn(stdout);
-            localAddress = stdout.trim();
-            echo('local ip address: '+localAddress);
-            startServer();
+          stdout.search(lo_re);
+          localAddress = stdout.trim();
+          echo('local ip address: '+localAddress);
+          startServer();
         } else {
           require('child_process').exec('ifconfig wlan0 | grep \'inet\' | cut -d: -f2 | awk \'{ print $2}\'', function (error, stdout, stderr) {
               if (stdout.search(ip_re) !== -1) {
-                warn(stdout);
-                  localAddress = stdout.trim();
-                  echo('local ip address: '+localAddress);
-                  startServer();
+                stdout.search(lo_re);
+                localAddress = stdout.trim();
+                echo('local ip address: '+localAddress);
+                startServer();
               } else {
                 require('child_process').exec('ifconfig en0 | grep \'inet\' | cut -d: -f2 | awk \'{ print $2}\'', function (error, stdout, stderr) {
                     if (stdout.search(ip_re) !== -1) {
-                      warn(stdout);
-                        localAddress = stdout.trim();
-                        echo('local ip address: '+localAddress);
-                        startServer();
+                      stdout.search(lo_re);
+                      localAddress = stdout.trim();
+                      echo('local ip address: '+localAddress);
+                      startServer();
                     } else {
                       require('child_process').exec('ifconfig en1 | grep \'inet\' | cut -d: -f2 | awk \'{ print $2}\'', function (error, stdout, stderr) {
                           if (stdout.search(ip_re) !== -1) {
-                            warn(stdout);
-                              localAddress = stdout.trim();
-                              echo('local ip address: '+localAddress);
-                              startServer();
+                            stdout.search(lo_re);
+                            localAddress = stdout.trim();
+                            echo('local ip address: '+localAddress);
+                            startServer();
                           } else {
                             require('child_process').exec('ip addr show | grep \'inet\' | cut -d: -f2 | awk \'{ print $2}\' | cut -d/ -f1', function (error, stdout, stderr) {
                                 if (stdout.search(ip_re) !== -1) {
-                                  warn(stdout);
-                                    localAddress = stdout.trim();
+                                  var ip = stdout.match(lo_re);
+                                  if (ip.length > 1) {
+                                    localAddress = ip[1].trim();
                                     echo('local ip address: '+localAddress);
                                     startServer();
+                                  } else {
+                                      echo('couldn\'t find local ip address, play in offline mode');
+                                      playNextVideo();
+                                  }
                                 } else {
                                     echo('couldn\'t find local ip address, play in offline mode');
-                                    echo('.-.');
                                     playNextVideo();
                                 }
                             });
@@ -103,7 +108,6 @@ var startServer = function () {
         }
     }).listen(port, localAddress);
     echo('local server running at http://'+localAddress+':'+port);
-    echo(',-´');
     // call peer for status
     callPeer('playing');
 }
@@ -113,7 +117,7 @@ var parseRequest = function () {
     var url = urlmod.parse(req.url);
     if (url.href) {
         var cmd = url.href.slice(1);
-        echo('peer call: '+cmd);
+        echo('peer called: '+cmd);
         if (cmd === 'playing') respond(isPlaying());
         else if (cmd === 'ended') playNextVideo();
         else respond('bad command');
@@ -125,7 +129,7 @@ var parseRequest = function () {
 
 // respond to peer http requests
 var respond = function (data) {
-    echo('response to peer: '+ data);
+    echo('respond to peer with data: '+ data);
     var headers = {
         'Content-Length': Buffer.byteLength(data),
         'Content-Type': 'text/plain; charset=utf-8',
@@ -153,7 +157,7 @@ var callPeer = function (msg) {
 
 // parse peer's response to call
 var parsePeerResponse = function (data) {
-    echo('peer response: '+ data);
+    echo('peer responded: '+ data);
     if (data == 'no') {
         // peer is not playing, play local file
         echo('peer isn\'t playing, play');
@@ -192,23 +196,21 @@ var playNextVideo = function () {
         currFile++;
         playing = true;
         echo('play video: '+filename);
-        echo('..');
-        // vidProc = (player === 'omxplayer') ? spawn('omxplayer', ['-o', 'local', filename]) : spawn('mplayer', ['-vm', filename]);
         switch (player) {
           case 'omxplayer':
             vidProc =  spawn(player, ['-o', 'local', filename], { stdio: 'ignore' });
             break;
           case 'mplayer':
-            vidProc = spawn(player, ['-vm', '-fs', filename], { stdio: 'ignore' });
+            vidProc = spawn(player, ['-vm', '-fs', '--zoom', filename], { stdio: 'ignore' });
             break;
           case 'vlc':
             vidProc = spawn(player, ['-f', '--play-and-exit', filename], { stdio: 'ignore' });
             break;
           case '/Applications/VLC.app/Contents/MacOS/VLC':
-            vidProc = spawn(player, ['-f', '--play-and-exit', filename], { stdio: 'ignore' });
+            vidProc = spawn(player, ['-f', '--play-and-exit', '--video-on-top', '--mouse-hide-timeout 0', filename], { stdio: 'ignore' });
             break;
           case '~/Applications/VLC.app/Contents/MacOS/VLC':
-            vidProc = spawn(player, ['-f', '--play-and-exit', filename], { stdio: 'ignore' });
+            vidProc = spawn(player, ['-f', '--play-and-exit', '--video-on-top', '--mouse-hide-timeout 0', filename], { stdio: 'ignore' });
             break;
           default:
             vidProc = '';
