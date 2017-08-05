@@ -208,8 +208,8 @@ var playNextVideo = function () {
           default:
             vidProc = '';
         }
-        vidProc.stdout.on('data', function (data) { echo(data.toString()); });
-        vidProc.stderr.on('data', function (data) { echo(data.toString()); });
+        // vidProc.stdout.on('data', function (data) { echo(data.toString()); });
+        // vidProc.stderr.on('data', function (data) { echo(data.toString()); });
         vidProc.on('exit', function (code) {
             echo(player+' exited with code '+code);
             playing = false;
