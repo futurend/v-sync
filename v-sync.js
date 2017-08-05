@@ -129,7 +129,7 @@ var parseRequest = function () {
 
 // respond to peer http requests
 var respond = function (data) {
-    echo('respond to peer with data: '+ data);
+    echo('respond to peer: '+ data);
     var headers = {
         'Content-Length': Buffer.byteLength(data),
         'Content-Type': 'text/plain; charset=utf-8',
